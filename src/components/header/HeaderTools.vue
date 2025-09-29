@@ -613,7 +613,7 @@ const executeSaveCallback = (saveInfo) => {
       previewDoc = previewDoc
         .replace(/<script[^>]*data-assist-code="true"[^>]*>[\s\S]*?<\/script>/g, '')
         .replace(/<style[^>]*>\s*<\/style>/g, '')
-        .replace(/<script[^>]*>\s*<\/script>/g, '')
+        .replace(/<script(?![^>]*src\s*=\s*["'][^"']*["'])[^>]*>\s*<\/script>/gi, '')
     }
 
     const fn = new Function('saveInfo', 'console', 'alert', `
