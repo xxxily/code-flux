@@ -586,7 +586,7 @@ const copyPreviewHtml = async () => {
     previewDoc = previewDoc.replace(/<style[^>]*>\s*<\/style>/g, '')
     
     // 移除内容为空的 script 标签
-    previewDoc = previewDoc.replace(/<script[^>]*>\s*<\/script>/g, '')
+    previewDoc = previewDoc.replace(/<script(?![^>]*src\s*=\s*["'][^"']*["'])[^>]*>\s*<\/script>/gi, '')
 
     const success = await writeToClipboard(previewDoc)
     if (success) {

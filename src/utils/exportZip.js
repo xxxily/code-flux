@@ -26,7 +26,7 @@ const handlePreviewDoc = doc => {
     // 移除内容为空的 style 标签
     .replace(/<style[^>]*>\s*<\/style>/g, '')
     // 移除内容为空的 script 标签
-    .replace(/<script[^>]*>\s*<\/script>/g, '')
+    .replace(/<script(?![^>]*src\s*=\s*["'][^"']*["'])[^>]*>\s*<\/script>/gi, '')
 }
 
 const handleNormal = async data => {
