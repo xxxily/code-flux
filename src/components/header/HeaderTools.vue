@@ -186,7 +186,7 @@ const toggleSaveList = value => {
 }
 
 const hideAllList = extra => {
-  ;[showToolsList, showMoreList, showSaveList]
+  [showToolsList, showMoreList, showSaveList]
     .filter(item => item !== extra)
     .forEach(item => {
       item.value = false
@@ -237,26 +237,11 @@ const saveToLocal = async () => {
   lastSaveTime.value = now
 
   // 在移动端下弹出标题确认框
-  if (window.innerWidth <= 980) {
-    const { value: title } = await ElMessageBox.prompt('请输入标题', '保存', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputValue: store.state.editData.title,
-      inputValidator: value => {
-        if (!value.trim()) {
-          return '标题不能为空'
-        }
-        return true
-      }
-    })
-    if (title && title.trim()) {
-      store.commit('setCodeTitle', title.trim())
-    }
-  }
+  // if (window.innerWidth <= 980) {}
 
   try {
     store.commit('setLoading', true)
-    let fileData = createData()
+    let fileData = await createData()
     let id
     if (route.name === 'LocalEdit' && route.params.id) {
       await localDb.updateGist(Number(route.params.id), fileData)
@@ -302,7 +287,7 @@ const saveToGist = async () => {
 
   try {
     store.commit('setLoading', true)
-    let fileData = createData()
+    let fileData = await createData()
     let method = 'POST'
     let path = ''
     
@@ -340,7 +325,35 @@ const saveToGist = async () => {
   }
 }
 
-const createData = () => {
+const createData = async () => {
+  if(!store.state.editData.title || store.state.editData.title === '未命名') {
+    // 尝试读取store.state.editData.code.HTML.content下的标题内容
+    const htmlContent = store.state.editData.code?.HTML?.content || ''
+    const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/i)
+    if (titleMatch && titleMatch[1]) {
+      store.commit('setCodeTitle', titleMatch[1])
+    } else {
+      // 如果为移动端则提醒用户输入标题
+      if (isMobile) {
+        const { value: title } = await ElMessageBox.prompt('请输入标题', '保存', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputValue: store.state.editData.title,
+          inputValidator: value => {
+            if (!value.trim()) {
+              return '标题不能为空'
+            }
+            return true
+          }
+        })
+
+        if (title && title.trim()) {
+          store.commit('setCodeTitle', title.trim())
+        }
+      }
+    }
+  }
+
   let data = {
     description: store.state.editData.title,
     files: {},
@@ -671,7 +684,7 @@ const saveAsNew = async () => {
       if (route.name === 'LocalEdit' || !githubToken.value) {
         // 保存到本地，强制创建新记录
         store.commit('setLoading', true)
-        const fileData = createData()
+        const fileData = await createData()
         const newId = await localDb.saveGist(fileData)
         
         // 切换到新的编辑页面
@@ -694,7 +707,7 @@ const saveAsNew = async () => {
       } else {
         // 保存到Gist，创建新的gist
         store.commit('setLoading', true)
-        const fileData = createData()
+        const fileData = await createData()
         const { data } = await request('POST /gists', fileData)
         
         // 切换到新的编辑页面
