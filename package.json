@@ -1,7 +1,7 @@
 {
   "name": "code-flux",
   "description": "AI生成式前端代码预览/微调辅助工具，前端代码在线运行/发布平台，codepen、jsbin、jsfiddle等的开源替代方案",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "authors": [
     {
       "name": "xxxily (二开作者)"
