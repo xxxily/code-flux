@@ -153,6 +153,40 @@ const useLog = ({ proxy }) => {
 
 // 处理生成html结构
 const useCreateHtml = () => {
+  // 为外部资源添加超时和错误处理
+  const createResourceWithTimeout = (url, type, timeout = 10000) => {
+    return `
+      <script data-assist-code="true">
+        (function() {
+          const timer = setTimeout(function() {
+            console.warn('资源加载超时: ${url}');
+          }, ${timeout});
+
+          ${type === 'css' ? `
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '${url}';
+            link.onload = function() { clearTimeout(timer); };
+            link.onerror = function() {
+              clearTimeout(timer);
+              console.error('CSS加载失败: ${url}');
+            };
+            document.head.appendChild(link);
+          ` : `
+            const script = document.createElement('script');
+            script.src = '${url}';
+            script.onload = function() { clearTimeout(timer); };
+            script.onerror = function() {
+              clearTimeout(timer);
+              console.error('JS加载失败: ${url}');
+            };
+            document.head.appendChild(script);
+          `}
+        })();
+      <\/script>
+    `
+  }
+
   // 生成html结构
   const createHtml = (
     htmlStr,
@@ -164,16 +198,16 @@ const useCreateHtml = () => {
     openAlmightyConsole,
     useImport
   ) => {
-    // 添加依赖资源
+    // 添加依赖资源 - 使用带超时控制的方式
     let _cssResources = cssResources
       .map(item => {
-        return `<link href="${item.url}" rel="stylesheet">`
+        return createResourceWithTimeout(item.url, 'css', 10000)
       })
       .join('\n')
 
     let _jsResources = jsResources
       .map(item => {
-        return `<script src="${item.url}"><\/script>`
+        return createResourceWithTimeout(item.url, 'js', 10000)
       })
       .join('\n')
 
@@ -184,13 +218,13 @@ const useCreateHtml = () => {
 
     let head = `
       <title>预览<\/title>
-      ${_cssResources}
       <style type="text/css">
           ${cssStr}
       <\/style>
       ${openAlmightyConsole? erudaCode : ''}
       <script data-assist-code="true" src="${base}base/index.js"><\/script>
       <script data-assist-code="true" src="${base}console/${dev ? 'index.js' : 'compile.js'}"><\/script>
+      ${_cssResources}
     `
 
     let jsContent = ''
@@ -198,7 +232,7 @@ const useCreateHtml = () => {
 
     // 出错运行通知已经在console/index.js中处理过了，这里不再处理
     // let errorRunNotify = `window.parent.postMessage({type: 'errorRun'})`
-    
+
     // 是否开启eruda
     // jsContent += openAlmightyConsole ? erudaCode : ''
 
@@ -280,105 +314,178 @@ const useRun = ({
   const runStartTime = ref(0)
   // 添加一个 key 来强制重新渲染 iframe
   const iframeKey = ref(0)
+  // 添加取消控制器
+  const runAbortController = ref(null)
 
   const run = async (syncTitle = false) => {
     try {
+      // 取消之前的运行
+      if (runAbortController.value) {
+        runAbortController.value.abort()
+      }
+      runAbortController.value = new AbortController()
+
+      // 清理旧的 iframe
+      if (iframeRef.value) {
+        try {
+          // 停止旧 iframe 中的所有加载
+          const oldIframe = iframeRef.value
+          if (oldIframe.contentWindow) {
+            oldIframe.contentWindow.stop && oldIframe.contentWindow.stop()
+          }
+          // 清空 srcdoc，停止加载
+          srcdoc.value = ''
+        } catch (e) {
+          // 忽略跨域错误
+          console.warn('清理旧 iframe 时出错:', e)
+        }
+      }
+
+      // 等待一个 tick 确保清理完成
+      await nextTick()
+
       // 强制重新渲染iframe
       iframeKey.value = Date.now()
-      
-      // 等待下一个tick确保iframe已经重新创建
-      await nextTick()
-      
+
+      // 等待 iframe 真正加载完成
+      await new Promise((resolve, reject) => {
+        const signal = runAbortController.value.signal
+        if (signal.aborted) {
+          reject(new Error('运行已取消'))
+          return
+        }
+
+        let attempts = 0
+        const maxAttempts = 40 // 最多等待 2 秒 (40 * 50ms)
+        const checkIframe = () => {
+          if (signal.aborted) {
+            reject(new Error('运行已取消'))
+            return
+          }
+          if (iframeRef.value && iframeRef.value.contentWindow) {
+            resolve()
+          } else {
+            attempts++
+            if (attempts >= maxAttempts) {
+              reject(new Error('iframe 初始化超时'))
+              return
+            }
+            setTimeout(checkIframe, 50)
+          }
+        }
+        checkIframe()
+      })
+
       runStartTime.value = Date.now()
       proxy.$eventEmitter.emit('startRun')
       if (!keepPreviousLogs.value) {
         proxy.$eventEmitter.emit('clear_logs')
       }
 
-      // 添加超时Promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('运行超时')), 5000)
+      // 分阶段超时控制
+      const compileTimeout = 8000  // 编译超时 8 秒
+      const totalTimeout = 15000   // 总超时 15 秒
+
+      const startTime = Date.now()
+
+      // 编译阶段
+      const compilePromise = (async () => {
+        let _jsResourcesPlus = []
+        let _cssResourcesPlus = []
+        let compiledData = null
+
+        // vue单文件
+        if (
+          layout.value === 'vue' ||
+          (layout.value === 'newWindowPreview' && vueContent.value)
+        ) {
+          compiledData = await compileVue(
+            vueLanguage.value,
+            vueContent.value,
+            importMap.value.imports || {}
+          )
+          if (compiledData) {
+            // 自动引入vue资源
+            // _jsResourcesPlus = getTemplate(vueLanguage.value).code.JS.resources;
+          } else {
+            compiledData = {
+              html: '',
+              css: '',
+              js: ''
+            }
+          }
+        } else {
+          compiledData = await compile(
+            htmlLanguage.value,
+            jsLanguage.value,
+            cssLanguage.value,
+            htmlContent.value,
+            jsContent.value,
+            importMap.value.imports || {},
+            cssContent.value
+          )
+        }
+
+        return compiledData
+      })()
+
+      const compileTimeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('编译超时，请检查代码复杂度或语法错误')), compileTimeout)
       })
 
-      // 使用 Promise.race 竞争
-      await Promise.race([
-        // 原有运行逻辑
-        (async () => {
-          let _jsResourcesPlus = []
-          let _cssResourcesPlus = []
-          let compiledData = null
+      const abortPromise = new Promise((_, reject) => {
+        runAbortController.value.signal.addEventListener('abort', () => {
+          reject(new Error('运行已取消'))
+        })
+      })
 
-          // vue单文件
-          if (
-            layout.value === 'vue' ||
-            (layout.value === 'newWindowPreview' && vueContent.value)
-          ) {
-            compiledData = await compileVue(
-              vueLanguage.value,
-              vueContent.value,
-              importMap.value.imports || {}
-            )
-            if (compiledData) {
-              // 自动引入vue资源
-              // _jsResourcesPlus = getTemplate(vueLanguage.value).code.JS.resources;
-            } else {
-              compiledData = {
-                html: '',
-                css: '',
-                js: ''
-              }
-            }
-          } else {
-            compiledData = await compile(
-              htmlLanguage.value,
-              jsLanguage.value,
-              cssLanguage.value,
-              htmlContent.value,
-              jsContent.value,
-              importMap.value.imports || {},
-              cssContent.value
-            )
-          }
+      // 编译阶段竞争
+      const compiledData = await Promise.race([compilePromise, compileTimeoutPromise, abortPromise])
 
-          let _cssResources = _cssResourcesPlus.concat(
-            cssResources.value.map(item => ({
-              ...item
-            }))
-          )
-          let _jsResources = _jsResourcesPlus.concat(
-            jsResources.value.map(item => ({
-              ...item
-            }))
-          )
+      // 检查是否已超过总超时
+      if (Date.now() - startTime > totalTimeout) {
+        throw new Error('运行总时间超时')
+      }
 
-          let doc = createHtml(
-            compiledData.html,
-            compiledData.js.js,
-            compiledData.css,
-            _cssResources,
-            _jsResources,
-            importMap.value,
-            openAlmightyConsole.value,
-            compiledData.js.useImport
-          )
+      let _jsResourcesPlus = []
+      let _cssResourcesPlus = []
 
-          store.commit('setPreviewDoc', doc)
+      let _cssResources = _cssResourcesPlus.concat(
+        cssResources.value.map(item => ({
+          ...item
+        }))
+      )
+      let _jsResources = _jsResourcesPlus.concat(
+        jsResources.value.map(item => ({
+          ...item
+        }))
+      )
 
-          // 同步更新标题
-          if (syncTitle) {
-            const titleMatch = doc.match(/<title[^>]*>(.*?)<\/title>/i)
-            if (titleMatch && titleMatch[1]) {
-              document.title = titleMatch[1].trim()
-            }
-          }
+      let doc = createHtml(
+        compiledData.html,
+        compiledData.js.js,
+        compiledData.css,
+        _cssResources,
+        _jsResources,
+        importMap.value,
+        openAlmightyConsole.value,
+        compiledData.js.useImport
+      )
 
-          srcdoc.value = doc
-          isNewWindowPreview.value = false
-        })(),
-        timeoutPromise
-      ])
+      store.commit('setPreviewDoc', doc)
+
+      // 同步更新标题
+      if (syncTitle) {
+        const titleMatch = doc.match(/<title[^>]*>(.*?)<\/title>/i)
+        if (titleMatch && titleMatch[1]) {
+          document.title = titleMatch[1].trim()
+        }
+      }
+
+      srcdoc.value = doc
+      isNewWindowPreview.value = false
     } catch (error) {
-      console.log(error)
+      console.error('运行错误:', error)
       proxy.$eventEmitter.emit('custom_logs', {
         data: {
           type: 'console',
@@ -398,6 +505,11 @@ const useRun = ({
   proxy.$eventEmitter.on('run', run)
 
   onBeforeUnmount(() => {
+    // 取消正在运行的任务
+    if (runAbortController.value) {
+      runAbortController.value.abort()
+    }
+    // 清理事件监听
     proxy.$eventEmitter.off('run', run)
   })
 
