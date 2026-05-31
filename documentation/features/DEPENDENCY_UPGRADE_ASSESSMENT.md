@@ -5,6 +5,7 @@
 **适用范围**：新需求开发前的依赖治理、构建链路现代化、安全风险收敛  
 **结论摘要**：建议先做“Node/CI 基线统一 + 安全补丁 + 运行时版本对齐”，再启动“Vue CLI 4 迁移到 Vite”的主升级分支；不建议直接执行全量 `npm update --latest`。
 **Phase 2 更新**：已启动 Vite 迁移，主构建配置入口切换为 `vite.config.js`，并移除 Vue CLI 4 / Webpack 4 主链路。
+**Phase 3/4 更新**：已迁移到 ESLint flat config，升级 ESLint 主链路，并完成 Monaco `0.55.1` 升级；Vuex、`resize-observer-polyfill`、`cropperjs@1` 暂按保守策略保留。
 
 ---
 
@@ -389,6 +390,15 @@ Code-Flux 当前是一个 Vue 3 应用，但构建链路仍停留在 Vue CLI 4 /
 - 格式化 PR 不包含业务逻辑改动。
 - CI 中 lint 命令与本地一致。
 
+**实施结果（2026-05-31）**：
+
+- 新增 `eslint.config.mjs`，移除 `package.json.eslintConfig`。
+- `eslint` 升级到 `10.4.1`，`eslint-plugin-vue` 升级到 `10.9.1`，新增 `vue-eslint-parser@10.4.0`、`@eslint/js@10.0.1`、`globals@17.6.0`。
+- 移除 `@babel/eslint-parser`。当前源码不依赖 Babel parser 特性，且该包最新 peer dependency 尚未声明支持 ESLint 10。
+- 保持规则强度接近旧 `plugin:vue/vue3-essential`，关闭迁移后新增但不属于本阶段目标的 `vue/multi-word-component-names`、`no-useless-assignment` 噪音项，避免扩大业务 diff。
+- Prettier 仍保持 `1.19.1`，按原计划留给独立格式化 PR。
+- `npm run lint -- --no-fix` 已通过。
+
 ### Phase 4：Monaco、状态层和体验型升级
 
 **目标**：处理高价值但非前置阻塞项。
@@ -400,6 +410,17 @@ Code-Flux 当前是一个 Vue 3 应用，但构建链路仍停留在 Vue CLI 4 /
 3. 状态管理保留 Vuex 4，等新需求稳定后再评估 Pinia。
 4. `resize-observer-polyfill` 可评估删除，但需确认目标浏览器。
 5. `cropperjs@2` 单独评估 API 变化后再升级。
+
+**实施结果（2026-05-31）**：
+
+- `monaco-editor` 升级到 `0.55.1`。
+- 继续使用 Vite `?worker` 导入方式加载 `editor/json/css/html/ts` worker；生产构建已输出对应 worker chunk。
+- `monaco-editor-textmate@4.0.0`、`monaco-textmate@3.0.1`、`onigasm@2.2.5` 保留。当前组合仍能构建并通过 E2E，后续如替换 TextMate 链路应单独做编辑器专项。
+- 为消除 Monaco 固定依赖 `dompurify@3.2.7` 带来的生产 audit moderate 漏洞，使用 npm `overrides` 将 `dompurify` 提升到 `3.4.7`。
+- `vuex@4.1.0` 保留，暂不引入 Pinia 迁移。
+- `resize-observer-polyfill@1.5.1` 保留。当前使用点仍在拖拽布局和编辑器尺寸监听，删除前需确认目标浏览器和回归拖拽/布局行为。
+- `cropperjs` 保持 1.x（当前解析为 `1.6.2`），暂不升级 2.x，避免影响 `CodeToImg.vue` 的裁剪 API。
+- `npm run build`、`npm run test:e2e`、`npm audit`、`npm audit --omit=dev` 已通过。
 
 ---
 
