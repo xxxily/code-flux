@@ -1,0 +1,276 @@
+# 版本发布指引
+
+本文档规范了 Code-Flux 项目的版本发布流程，确保每次发布都遵循统一的标准。
+
+## 版本号规范
+
+采用语义化版本号（Semantic Versioning）：`主版本号.次版本号.修订号`
+
+- **主版本号（Major）**：不兼容的 API 修改
+- **次版本号（Minor）**：向下兼容的功能性新增
+- **修订号（Patch）**：向下兼容的问题修正
+
+示例：
+- `1.0.0` → `2.0.0`：重大架构调整或破坏性变更
+- `1.2.0` → `1.3.0`：新增功能特性
+- `1.2.3` → `1.2.4`：Bug 修复、文档更新、测试完善
+
+## 发布前检查清单
+
+在开始发布流程前，确保：
+
+- [ ] 所有计划的功能已完成并合并到主分支
+- [ ] 所有测试通过（`npm test`）
+- [ ] 代码已通过 lint 检查（`npm run lint`）
+- [ ] 文档已更新（README、CLAUDE.md 等）
+- [ ] 没有遗留的 TODO 或 FIXME 注释（针对本次发布）
+- [ ] 本地代码与远程主分支同步
+
+## 发布流程
+
+### 1. 确定版本号
+
+根据本次更新内容确定新版本号：
+
+```bash
+# 查看当前版本
+cat package.json | grep version
+
+# 查看最近的提交记录，评估变更类型
+git log --oneline -20
+```
+
+### 2. 更新版本号
+
+编辑 `package.json`，更新 `version` 字段：
+
+```json
+{
+  "version": "x.y.z"
+}
+```
+
+### 3. 更新 CHANGELOG
+
+编辑 `changeLog.md`，在文件顶部添加新版本的更新日志：
+
+```markdown
+## x.y.z [YYYY/MM/DD]
+
+* 功能描述 1
+* 功能描述 2
+* Bug 修复描述
+* 文档更新描述
+```
+
+**编写规范**：
+- 使用简洁明了的语言描述变更
+- 按类型分组：新功能、优化、修复、文档、测试等
+- 重要变更放在前面
+- 使用用户视角描述（而非技术实现细节）
+
+**示例**：
+```markdown
+## 1.2.4 [2025/05/31]
+
+* 完善自动化测试系统，测试覆盖率提升至 25.6%
+* 添加项目开发规范和测试约束文档
+* 为核心工具函数和组件添加单元测试
+* 优化测试文件组织结构
+* 添加测试实施指南和策略文档
+```
+
+### 4. 提交版本更新
+
+```bash
+# 添加修改的文件
+git add package.json changeLog.md
+
+# 提交（使用规范的提交信息）
+git commit -m "chore: 发布 v1.2.4 版本"
+```
+
+### 5. 创建 Git Tag
+
+```bash
+# 创建带注释的标签
+git tag -a v1.2.4 -m "Release v1.2.4
+
+主要更新：
+- 完善自动化测试系统
+- 添加开发规范文档
+- 提升测试覆盖率
+"
+
+# 查看标签是否创建成功
+git tag -l | tail -5
+```
+
+### 6. 推送到远程仓库
+
+```bash
+# 推送代码
+git push origin main
+
+# 推送标签
+git push origin v1.2.4
+
+# 或者推送所有标签
+git push origin --tags
+```
+
+### 7. 验证发布
+
+```bash
+# 验证远程标签
+git ls-remote --tags origin
+
+# 验证 GitHub Release（如果配置了自动发布）
+# 访问：https://github.com/xxxily/code-flux/releases
+```
+
+### 8. 构建和部署（可选）
+
+如果需要部署到生产环境：
+
+```bash
+# 构建生产版本
+npm run build
+
+# 部署到服务器（根据实际部署方式）
+# 例如：使用 Docker
+npm run docker:build
+npm run docker:up
+```
+
+## 快速发布命令
+
+完整的发布流程可以通过以下命令快速执行：
+
+```bash
+# 1. 确保在主分支且代码最新
+git checkout main
+git pull origin main
+
+# 2. 运行测试
+npm test
+
+# 3. 手动编辑 package.json 和 changeLog.md
+
+# 4. 提交并打标签（替换版本号）
+VERSION="1.2.4"
+git add package.json changeLog.md
+git commit -m "chore: 发布 v${VERSION} 版本"
+git tag -a "v${VERSION}" -m "Release v${VERSION}"
+
+# 5. 推送
+git push origin main
+git push origin "v${VERSION}"
+```
+
+## 发布后工作
+
+### 1. 创建 GitHub Release（推荐）
+
+在 GitHub 仓库页面：
+1. 进入 Releases 页面
+2. 点击 "Draft a new release"
+3. 选择刚创建的标签
+4. 填写 Release 标题和描述（可复制 CHANGELOG 内容）
+5. 发布 Release
+
+### 2. 通知相关人员
+
+- 在项目群组或频道通知版本发布
+- 说明主要更新内容
+- 提供升级指引（如有必要）
+
+### 3. 监控反馈
+
+- 关注 GitHub Issues
+- 监控生产环境日志
+- 收集用户反馈
+
+## 回滚流程
+
+如果发布后发现严重问题需要回滚：
+
+```bash
+# 1. 回退到上一个版本的提交
+git revert HEAD
+
+# 2. 或者重置到上一个标签（谨慎使用）
+git reset --hard v1.2.3
+
+# 3. 强制推送（需要权限，谨慎操作）
+git push origin main --force
+
+# 4. 删除错误的标签
+git tag -d v1.2.4
+git push origin :refs/tags/v1.2.4
+```
+
+**注意**：强制推送会影响其他协作者，建议优先使用 `git revert` 而非 `git reset --hard`。
+
+## 常见问题
+
+### Q: 忘记更新 CHANGELOG 怎么办？
+
+```bash
+# 修改 CHANGELOG
+vim changeLog.md
+
+# 修正提交
+git add changeLog.md
+git commit --amend --no-edit
+
+# 强制推送（如果已经推送）
+git push origin main --force
+```
+
+### Q: 标签打错了怎么办？
+
+```bash
+# 删除本地标签
+git tag -d v1.2.4
+
+# 删除远程标签
+git push origin :refs/tags/v1.2.4
+
+# 重新创建正确的标签
+git tag -a v1.2.4 -m "Release v1.2.4"
+git push origin v1.2.4
+```
+
+### Q: 如何查看两个版本之间的差异？
+
+```bash
+# 查看提交差异
+git log v1.2.3..v1.2.4 --oneline
+
+# 查看代码差异
+git diff v1.2.3..v1.2.4
+```
+
+## 自动化发布（未来规划）
+
+考虑使用 CI/CD 工具自动化发布流程：
+
+- 使用 GitHub Actions 自动创建 Release
+- 自动生成 CHANGELOG
+- 自动构建和部署
+- 自动运行测试和检查
+
+示例配置文件位置：`.github/workflows/release.yml`
+
+## 参考资源
+
+- [语义化版本规范](https://semver.org/lang/zh-CN/)
+- [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)
+- [Keep a Changelog](https://keepachangelog.com/zh-CN/)
+- [Git 标签管理](https://git-scm.com/book/zh/v2/Git-基础-打标签)
+
+---
+
+**最后更新**：2025/05/31  
+**维护者**：xxxily
