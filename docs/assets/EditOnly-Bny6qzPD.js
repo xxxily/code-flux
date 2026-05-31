@@ -1,0 +1,1 @@
+import{W as e,v as t}from"./vendor-vue-B1A3DsP7.js";import{t as n}from"./Editor-B6w9q5Z4.js";var r={__name:`EditOnly`,setup(r){return(r,i)=>(e(),t(n))}};export{r as default};

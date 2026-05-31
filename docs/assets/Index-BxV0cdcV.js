@@ -1,0 +1,1 @@
+import{W as e,v as t}from"./vendor-vue-B1A3DsP7.js";import n from"./Index-CuCbsQMR.js";var r={__name:`Index`,setup(r){return(r,i)=>(e(),t(n,{embed:!0}))}};export{r as default};

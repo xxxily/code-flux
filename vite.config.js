@@ -23,7 +23,7 @@ export default defineConfig({
       },
       injectManifest: {
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
-        globIgnores: ['**/*.map', 'manifest*.js']
+        globIgnores: ['**/*.map', 'manifest*.js', 'CNAME', '.nojekyll']
       },
       injectRegister: false
     })
