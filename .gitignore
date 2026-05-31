@@ -9,3 +9,8 @@ monaco-editor-0.23.0
 less.js-master
 /dist/
 /browser-extension/
+
+# Test reports
+test-report.json
+coverage/
+.nyc_output/

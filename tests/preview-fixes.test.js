@@ -1,0 +1,477 @@
+/**
+ * 预览修复自动化测试套件
+ * 测试所有修复是否正常工作
+ */
+
+const puppeteer = require('puppeteer');
+const assert = require('assert');
+
+// 测试配置
+const TEST_CONFIG = {
+  baseUrl: 'http://localhost:8081',
+  timeout: 30000,
+  headless: true
+};
+
+// 测试结果
+const testResults = {
+  passed: 0,
+  failed: 0,
+  tests: []
+};
+
+// 工具函数
+function logTest(name, status, message = '') {
+  const result = { name, status, message, timestamp: new Date().toISOString() };
+  testResults.tests.push(result);
+
+  if (status === 'PASS') {
+    testResults.passed++;
+    console.log(`✅ ${name}`);
+  } else {
+    testResults.failed++;
+    console.error(`❌ ${name}: ${message}`);
+  }
+}
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// 测试 1: 外部资源超时控制
+async function testExternalResourceTimeout(page) {
+  console.log('\n📋 测试 1: 外部资源超时控制');
+
+  try {
+    // 导航到页面
+    await page.goto(TEST_CONFIG.baseUrl, { waitUntil: 'networkidle0' });
+
+    // 设置测试代码
+    const testCode = {
+      html: '<div id="app"><h1>测试外部资源超时</h1><p id="timer">加载时间：计时中...</p></div>',
+      css: 'body { font-family: Arial; padding: 20px; }',
+      js: `
+        const startTime = Date.now();
+        console.log('页面开始加载');
+        setTimeout(() => {
+          const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
+          document.getElementById('timer').textContent = \`加载时间：\${loadTime} 秒\`;
+          console.log(\`页面加载完成，耗时 \${loadTime} 秒\`);
+        }, 100);
+      `
+    };
+
+    // 添加不存在的外部资源
+    await page.evaluate(() => {
+      // 模拟添加外部资源的操作
+      // 这里需要根据实际的 UI 操作来实现
+    });
+
+    // 监听控制台输出
+    const consoleMessages = [];
+    page.on('console', msg => {
+      consoleMessages.push(msg.text());
+    });
+
+    // 点击运行按钮
+    const startTime = Date.now();
+    await page.click('[data-test="run-button"]').catch(() => {
+      // 如果没有 data-test 属性，尝试其他选择器
+      return page.evaluate(() => {
+        const runBtn = document.querySelector('button:contains("运行")') ||
+                       document.querySelector('.run-btn');
+        if (runBtn) runBtn.click();
+      });
+    });
+
+    // 等待最多 15 秒
+    await sleep(15000);
+    const endTime = Date.now();
+    const totalTime = (endTime - startTime) / 1000;
+
+    // 验证：应该在 12 秒内完成（10秒超时 + 2秒缓冲）
+    if (totalTime <= 12) {
+      logTest('外部资源超时控制', 'PASS', `完成时间: ${totalTime.toFixed(2)}秒`);
+    } else {
+      logTest('外部资源超时控制', 'FAIL', `超时: ${totalTime.toFixed(2)}秒`);
+    }
+
+    // 验证控制台是否有超时警告
+    const hasTimeoutWarning = consoleMessages.some(msg =>
+      msg.includes('资源加载超时') || msg.includes('加载失败')
+    );
+
+    if (hasTimeoutWarning) {
+      logTest('外部资源超时警告', 'PASS');
+    } else {
+      logTest('外部资源超时警告', 'FAIL', '未检测到超时警告');
+    }
+
+  } catch (error) {
+    logTest('外部资源超时控制', 'FAIL', error.message);
+  }
+}
+
+// 测试 2: 快速连续运行
+async function testRapidExecution(page) {
+  console.log('\n📋 测试 2: 快速连续运行');
+
+  try {
+    await page.goto(TEST_CONFIG.baseUrl, { waitUntil: 'networkidle0' });
+
+    // 设置简单的测试代码
+    const testCode = {
+      html: '<div id="app"><h1>快速切换测试</h1><p id="counter">0</p></div>',
+      js: `
+        const runId = Math.random().toString(36).substr(2, 9);
+        console.log('运行 ID:', runId);
+        const counter = parseInt(localStorage.getItem('runCounter') || '0') + 1;
+        localStorage.setItem('runCounter', counter);
+        document.getElementById('counter').textContent = counter;
+      `
+    };
+
+    // 快速点击运行按钮 10 次
+    const runCount = 10;
+    for (let i = 0; i < runCount; i++) {
+      await page.evaluate(() => {
+        const runBtn = document.querySelector('[data-test="run-button"]');
+        if (runBtn) runBtn.click();
+      });
+      await sleep(100); // 每次间隔 100ms
+    }
+
+    // 等待最后一次运行完成
+    await sleep(3000);
+
+    // 验证页面没有卡住
+    const isResponsive = await page.evaluate(() => {
+      return document.readyState === 'complete';
+    });
+
+    if (isResponsive) {
+      logTest('快速连续运行 - 页面响应', 'PASS');
+    } else {
+      logTest('快速连续运行 - 页面响应', 'FAIL', '页面无响应');
+    }
+
+    // 验证计数器是否正确
+    const finalCount = await page.evaluate(() => {
+      return parseInt(localStorage.getItem('runCounter') || '0');
+    });
+
+    if (finalCount >= runCount) {
+      logTest('快速连续运行 - 计数正确', 'PASS', `计数: ${finalCount}`);
+    } else {
+      logTest('快速连续运行 - 计数正确', 'FAIL', `预期 >= ${runCount}, 实际 ${finalCount}`);
+    }
+
+  } catch (error) {
+    logTest('快速连续运行', 'FAIL', error.message);
+  }
+}
+
+// 测试 3: 正常功能验证
+async function testNormalFunction(page) {
+  console.log('\n📋 测试 3: 正常功能验证');
+
+  try {
+    await page.goto(TEST_CONFIG.baseUrl, { waitUntil: 'networkidle0' });
+
+    // 设置测试代码
+    const testCode = {
+      html: `
+        <div id="app">
+          <h1>功能测试</h1>
+          <button onclick="handleClick()">点击我</button>
+          <p id="output">等待点击...</p>
+        </div>
+      `,
+      css: 'body { padding: 20px; }',
+      js: `
+        let clickCount = 0;
+        function handleClick() {
+          clickCount++;
+          document.getElementById('output').textContent = '点击次数：' + clickCount;
+          console.log('按钮点击 #' + clickCount);
+        }
+        console.log('页面加载完成');
+      `
+    };
+
+    // 运行代码
+    await page.evaluate(() => {
+      const runBtn = document.querySelector('[data-test="run-button"]');
+      if (runBtn) runBtn.click();
+    });
+
+    // 等待运行完成
+    await sleep(3000);
+
+    // 验证页面是否正常显示
+    const hasContent = await page.evaluate(() => {
+      const iframe = document.querySelector('iframe');
+      if (!iframe) return false;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      return iframeDoc.body.textContent.includes('功能测试');
+    });
+
+    if (hasContent) {
+      logTest('正常功能 - 页面显示', 'PASS');
+    } else {
+      logTest('正常功能 - 页面显示', 'FAIL', '页面内容未显示');
+    }
+
+    // 测试按钮点击
+    const clickWorked = await page.evaluate(() => {
+      const iframe = document.querySelector('iframe');
+      if (!iframe) return false;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      const button = iframeDoc.querySelector('button');
+      if (!button) return false;
+      button.click();
+      const output = iframeDoc.getElementById('output');
+      return output && output.textContent.includes('点击次数');
+    });
+
+    if (clickWorked) {
+      logTest('正常功能 - 交互功能', 'PASS');
+    } else {
+      logTest('正常功能 - 交互功能', 'FAIL', '按钮点击无效');
+    }
+
+  } catch (error) {
+    logTest('正常功能验证', 'FAIL', error.message);
+  }
+}
+
+// 测试 4: 加载状态显示
+async function testLoadingIndicator(page) {
+  console.log('\n📋 测试 4: 加载状态显示');
+
+  try {
+    await page.goto(TEST_CONFIG.baseUrl, { waitUntil: 'networkidle0' });
+
+    // 设置一个需要编译时间的代码
+    const testCode = {
+      html: '<div id="app"><h1>加载状态测试</h1></div>',
+      js: `
+        // 创建一些需要编译的代码
+        const data = Array.from({ length: 1000 }, (_, i) => ({ id: i, value: Math.random() }));
+        console.log('数据生成完成');
+      `
+    };
+
+    // 点击运行并立即检查加载状态
+    await page.evaluate(() => {
+      const runBtn = document.querySelector('[data-test="run-button"]');
+      if (runBtn) runBtn.click();
+    });
+
+    // 等待一小段时间，检查加载遮罩是否出现
+    await sleep(100);
+
+    const hasLoadingOverlay = await page.evaluate(() => {
+      return !!document.querySelector('.loading-overlay');
+    });
+
+    if (hasLoadingOverlay) {
+      logTest('加载状态 - 遮罩显示', 'PASS');
+    } else {
+      logTest('加载状态 - 遮罩显示', 'FAIL', '未检测到加载遮罩');
+    }
+
+    // 检查加载文本
+    const hasLoadingText = await page.evaluate(() => {
+      const loadingText = document.querySelector('.loading-text');
+      return loadingText && loadingText.textContent.length > 0;
+    });
+
+    if (hasLoadingText) {
+      logTest('加载状态 - 文本显示', 'PASS');
+    } else {
+      logTest('加载状态 - 文本显示', 'FAIL', '未检测到加载文本');
+    }
+
+    // 检查进度显示
+    const hasProgress = await page.evaluate(() => {
+      const progress = document.querySelector('.loading-progress');
+      return progress && progress.textContent.includes('%');
+    });
+
+    if (hasProgress) {
+      logTest('加载状态 - 进度显示', 'PASS');
+    } else {
+      logTest('加载状态 - 进度显示', 'FAIL', '未检测到进度显示');
+    }
+
+    // 检查取消按钮
+    const hasCancelButton = await page.evaluate(() => {
+      return !!document.querySelector('.cancel-btn');
+    });
+
+    if (hasCancelButton) {
+      logTest('加载状态 - 取消按钮', 'PASS');
+    } else {
+      logTest('加载状态 - 取消按钮', 'FAIL', '未检测到取消按钮');
+    }
+
+    // 等待加载完成
+    await sleep(3000);
+
+    // 验证加载遮罩是否消失
+    const loadingGone = await page.evaluate(() => {
+      return !document.querySelector('.loading-overlay');
+    });
+
+    if (loadingGone) {
+      logTest('加载状态 - 自动消失', 'PASS');
+    } else {
+      logTest('加载状态 - 自动消失', 'FAIL', '加载遮罩未消失');
+    }
+
+  } catch (error) {
+    logTest('加载状态显示', 'FAIL', error.message);
+  }
+}
+
+// 测试 5: 取消功能
+async function testCancelFunction(page) {
+  console.log('\n📋 测试 5: 取消功能');
+
+  try {
+    await page.goto(TEST_CONFIG.baseUrl, { waitUntil: 'networkidle0' });
+
+    // 设置一个需要较长编译时间的代码
+    const testCode = {
+      html: '<div id="app"><h1>取消功能测试</h1></div>',
+      js: `
+        // 创建大量数据
+        const data = Array.from({ length: 10000 }, (_, i) => ({
+          id: i,
+          value: Math.random(),
+          nested: Array.from({ length: 100 }, (_, j) => j)
+        }));
+        console.log('数据生成完成');
+      `
+    };
+
+    // 点击运行
+    await page.evaluate(() => {
+      const runBtn = document.querySelector('[data-test="run-button"]');
+      if (runBtn) runBtn.click();
+    });
+
+    // 等待加载状态出现
+    await sleep(200);
+
+    // 点击取消按钮
+    const cancelClicked = await page.evaluate(() => {
+      const cancelBtn = document.querySelector('.cancel-btn');
+      if (cancelBtn) {
+        cancelBtn.click();
+        return true;
+      }
+      return false;
+    });
+
+    if (cancelClicked) {
+      logTest('取消功能 - 按钮可点击', 'PASS');
+    } else {
+      logTest('取消功能 - 按钮可点击', 'FAIL', '取消按钮不可点击');
+    }
+
+    // 等待一小段时间
+    await sleep(500);
+
+    // 验证加载是否已取消
+    const loadingCancelled = await page.evaluate(() => {
+      return !document.querySelector('.loading-overlay');
+    });
+
+    if (loadingCancelled) {
+      logTest('取消功能 - 运行已取消', 'PASS');
+    } else {
+      logTest('取消功能 - 运行已取消', 'FAIL', '运行未取消');
+    }
+
+  } catch (error) {
+    logTest('取消功能', 'FAIL', error.message);
+  }
+}
+
+// 主测试函数
+async function runTests() {
+  console.log('🚀 开始自动化测试...\n');
+  console.log('测试配置:', TEST_CONFIG);
+
+  let browser;
+  let page;
+
+  try {
+    // 启动浏览器
+    browser = await puppeteer.launch({
+      headless: TEST_CONFIG.headless,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
+
+    // 设置超时
+    page.setDefaultTimeout(TEST_CONFIG.timeout);
+
+    // 运行所有测试
+    await testExternalResourceTimeout(page);
+    await testRapidExecution(page);
+    await testNormalFunction(page);
+    await testLoadingIndicator(page);
+    await testCancelFunction(page);
+
+  } catch (error) {
+    console.error('测试执行错误:', error);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+
+  // 输出测试结果
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 测试结果汇总');
+  console.log('='.repeat(60));
+  console.log(`总计: ${testResults.tests.length} 个测试`);
+  console.log(`✅ 通过: ${testResults.passed}`);
+  console.log(`❌ 失败: ${testResults.failed}`);
+  console.log(`成功率: ${((testResults.passed / testResults.tests.length) * 100).toFixed(2)}%`);
+  console.log('='.repeat(60));
+
+  // 输出详细结果
+  console.log('\n📋 详细结果:');
+  testResults.tests.forEach((test, index) => {
+    const icon = test.status === 'PASS' ? '✅' : '❌';
+    console.log(`${index + 1}. ${icon} ${test.name}`);
+    if (test.message) {
+      console.log(`   ${test.message}`);
+    }
+  });
+
+  // 保存测试报告
+  const fs = require('fs');
+  const reportPath = './test-report.json';
+  fs.writeFileSync(reportPath, JSON.stringify(testResults, null, 2));
+  console.log(`\n📄 测试报告已保存到: ${reportPath}`);
+
+  // 返回退出码
+  process.exit(testResults.failed > 0 ? 1 : 0);
+}
+
+// 运行测试
+if (require.main === module) {
+  runTests().catch(error => {
+    console.error('测试失败:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { runTests };

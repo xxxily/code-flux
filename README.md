@@ -7,6 +7,12 @@ English  |  **[中文文档](./README-zh.md)**
 Live demo: [code-flux.anzz.top](https://code-flux.anzz.top)  
 GitHub: [github.com/xxxily/code-flux](https://github.com/xxxily/code-flux)  
 
+## 📚 Documentation
+
+- [Project Documentation](./documentation/) - Technical documentation, fixes, and testing guides
+- [Preview Fixes](./documentation/fixes/) - Preview stuck issue fixes and analysis
+- [Testing Strategy](./documentation/testing/) - Automated testing system planning
+
 # Use Cases
 
 > The main goal of this project is to leverage AI-generated frontend code capabilities to easily preview or fine-tune AI-generated frontend pages, and quickly publish high-quality, interactive web creations adaptable to multiple scenarios.
