@@ -1,5 +1,19 @@
 # 更新日志
 
+## 1.2.5 [2026/05/31]
+
+### Changed（变更）
+* 将开发服务、Vite 配置、Playwright E2E 配置统一为 8080 端口
+* 迁移构建体系到 Vite 8，并刷新生产构建产物
+* 升级核心依赖和测试工具链，更新 ESLint flat config
+* 优化构建拆包策略，降低入口 chunk 体积
+
+### Fixed（修复）
+* 修复 Vue 3 `/deep/` 深度选择器弃用警告
+* 修复 Monaco 相关浏览器构建兼容警告
+* 修复 PWA service worker 构建中的 `inlineDynamicImports` 弃用警告
+* 修复 Vue compiler macro 导入和 Element Plus 旧尺寸值警告
+
 ## 1.2.4 [2026/05/31]
 
 ### Added（新增）
