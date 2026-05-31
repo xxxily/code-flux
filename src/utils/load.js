@@ -14,34 +14,53 @@ const resources = {
   scss: ['sass']
 }
 
-export const load = preprocessorList => {
+export const load = (preprocessorList, retryCount = 2) => {
   // 过滤出没有加载过的资源
   let notLoaded = preprocessorList.filter(item => {
     return !preprocessorLoaded[item]
   })
   if (notLoaded.length <= 0) {
-    return
+    return Promise.resolve()
   }
+
   return new Promise((resolve, reject) => {
-    // 生成加载资源的路径
-    let jsList = []
-    notLoaded.forEach(item => {
-      let _resources = (resources[item] || [item]).map(r => {
-        return /^https?/.test(item) ? item : `${base}parses/${r}.js`
-      })
-      jsList.push(..._resources)
-    })
-    loadjs(jsList, {
-      returnPromise: true
-    })
-      .then(() => {
-        notLoaded.forEach(item => {
-          preprocessorLoaded[item] = true
+    const attemptLoad = (attempt = 0) => {
+      // 生成加载资源的路径
+      let jsList = []
+      notLoaded.forEach(item => {
+        let _resources = (resources[item] || [item]).map(r => {
+          return /^https?/.test(item) ? item : `${base}parses/${r}.js`
         })
-        resolve()
+        jsList.push(..._resources)
       })
-      .catch(err => {
-        reject(err)
+
+      // 添加超时控制
+      const loadTimeout = 10000
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('编译器加载超时')), loadTimeout)
       })
+
+      Promise.race([
+        loadjs(jsList, { returnPromise: true }),
+        timeoutPromise
+      ])
+        .then(() => {
+          notLoaded.forEach(item => {
+            preprocessorLoaded[item] = true
+          })
+          resolve()
+        })
+        .catch(err => {
+          if (attempt < retryCount) {
+            console.warn(`编译器加载失败，重试 ${attempt + 1}/${retryCount}`, err)
+            setTimeout(() => attemptLoad(attempt + 1), 1000)
+          } else {
+            console.error('编译器加载失败，已达到最大重试次数', err)
+            reject(err)
+          }
+        })
+    }
+
+    attemptLoad()
   })
 }

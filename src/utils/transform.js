@@ -173,41 +173,53 @@ const transformCssImport = (cssStr = '') => {
 /**
  * @Desc: 编译css
  */
-let sass = null
 const css = (preprocessor, code) => {
   return new Promise((resolve, reject) => {
+    // 添加超时控制
+    const timeout = setTimeout(() => {
+      reject(new Error('CSS编译超时'))
+    }, 5000)
+
     try {
       switch (preprocessor) {
         case 'css':
+          clearTimeout(timeout)
           resolve(transformCssImport(code))
           break
         case 'less':
           window.less.render(code).then(
             output => {
+              clearTimeout(timeout)
               resolve(transformCssImport(output.css))
             },
             error => {
+              clearTimeout(timeout)
               reject(error)
             }
           )
           break
         case 'sass':
         case 'scss':
-          if (!sass) {
-            sass = new window.Sass()
-          }
-          sass.compile(
+          // 每次创建新实例，避免状态混乱
+          const sassInstance = new window.Sass()
+          sassInstance.compile(
             code,
             {
               indentedSyntax: preprocessor === 'sass'
             },
             result => {
-              resolve(transformCssImport(result.text))
+              clearTimeout(timeout)
+              if (result.status === 0) {
+                resolve(transformCssImport(result.text))
+              } else {
+                reject(new Error(result.message || 'Sass编译失败'))
+              }
             }
           )
           break
         case 'stylus':
           window.stylus.render(code, (err, css) => {
+            clearTimeout(timeout)
             if (err) {
               reject(err)
             } else {
@@ -220,7 +232,12 @@ const css = (preprocessor, code) => {
             .postcss([window.cssnext])
             .process(code)
             .then(result => {
+              clearTimeout(timeout)
               resolve(transformCssImport(result.css))
+            })
+            .catch(error => {
+              clearTimeout(timeout)
+              reject(error)
             })
           break
         default:
@@ -446,7 +463,7 @@ const vue = (preprocessor, code, importMap) => {
               componentData.descriptor,
               {
                 inlineTemplate: true,
-                refSugar: true,
+                // refSugar 已废弃，移除此选项
                 id: Math.random() + ''
               }
             )

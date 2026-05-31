@@ -12,9 +12,8 @@
 
 ### 📝 修复总结
 - **FIXES_SUMMARY.md** - 修复工作总结
-  - 已完成的修复（任务 1-3）
+  - 已完成的修复（任务 1-7）
   - 修复效果对比
-  - 待修复项（任务 4-7）
   - 回滚方案
 
 ### 🧪 测试文档
@@ -32,12 +31,12 @@
 
 ### 1. 查看问题分析
 ```bash
-cat PREVIEW_ISSUES_ANALYSIS.md
+cat docs/fixes/PREVIEW_ISSUES_ANALYSIS.md
 ```
 
 ### 2. 查看修复总结
 ```bash
-cat FIXES_SUMMARY.md
+cat docs/fixes/FIXES_SUMMARY.md
 ```
 
 ### 3. 进行测试
@@ -46,7 +45,7 @@ cat FIXES_SUMMARY.md
 npm run serve
 
 # 在浏览器中打开测试页面
-open test-preview-fixes.html
+open docs/fixes/test-preview-fixes.html
 ```
 
 ## 修复进度
@@ -54,17 +53,17 @@ open test-preview-fixes.html
 - [x] 任务 1: 外部资源加载超时控制
 - [x] 任务 2: 优化 run 函数的超时机制
 - [x] 任务 3: iframe 重新渲染机制优化
-- [ ] 任务 4: 为编译器加载添加超时和重试
-- [ ] 任务 5: 修复 Sass 编译器单例问题
-- [ ] 任务 6: 修复 Vue3 编译器问题
-- [ ] 任务 7: 添加加载状态指示器
+- [x] 任务 4: 为编译器加载添加超时和重试
+- [x] 任务 5: 修复 Sass 编译器单例问题
+- [x] 任务 6: 修复 Vue3 编译器问题
+- [x] 任务 7: 添加加载状态指示器
 
 ## 相关文件
 
 ### 修改的源代码文件
-- `src/components/Preview.vue` - 主要修复文件
-- `src/utils/load.js` - 待修复（任务 4）
-- `src/utils/transform.js` - 待修复（任务 5, 6）
+- `src/components/Preview.vue` - 主要修复文件（任务 1-3, 7）
+- `src/utils/load.js` - 编译器加载优化（任务 4）
+- `src/utils/transform.js` - 编译器修复（任务 5, 6）
 
 ## 联系方式
 

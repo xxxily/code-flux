@@ -3,6 +3,16 @@
     class="previewBox"
     :class="{ hide: hide, disabledEvents: disabledEvents }"
   >
+    <!-- 添加加载遮罩 -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text">{{ loadingText }}</div>
+        <div class="loading-progress">{{ loadingProgress }}</div>
+        <button @click="cancelRun" class="cancel-btn">取消运行</button>
+      </div>
+    </div>
+
     <iframe
       class="iframe"
       ref="iframeRef"
@@ -316,9 +326,28 @@ const useRun = ({
   const iframeKey = ref(0)
   // 添加取消控制器
   const runAbortController = ref(null)
+  // 添加加载状态
+  const isLoading = ref(false)
+  const loadingText = ref('正在初始化...')
+  const loadingProgress = ref('')
+
+  // 取消运行
+  const cancelRun = () => {
+    if (runAbortController.value) {
+      runAbortController.value.abort()
+    }
+    isLoading.value = false
+    loadingText.value = '运行已取消'
+    proxy.$eventEmitter.emit('errorRun')
+  }
 
   const run = async (syncTitle = false) => {
     try {
+      // 显示加载状态
+      isLoading.value = true
+      loadingText.value = '正在初始化...'
+      loadingProgress.value = '0%'
+
       // 取消之前的运行
       if (runAbortController.value) {
         runAbortController.value.abort()
@@ -382,6 +411,10 @@ const useRun = ({
         proxy.$eventEmitter.emit('clear_logs')
       }
 
+      // 更新加载进度
+      loadingText.value = '正在编译代码...'
+      loadingProgress.value = '20%'
+
       // 分阶段超时控制
       const compileTimeout = 8000  // 编译超时 8 秒
       const totalTimeout = 15000   // 总超时 15 秒
@@ -399,6 +432,8 @@ const useRun = ({
           layout.value === 'vue' ||
           (layout.value === 'newWindowPreview' && vueContent.value)
         ) {
+          loadingText.value = '正在编译 Vue 组件...'
+          loadingProgress.value = '30%'
           compiledData = await compileVue(
             vueLanguage.value,
             vueContent.value,
@@ -415,6 +450,8 @@ const useRun = ({
             }
           }
         } else {
+          loadingText.value = '正在编译 HTML/CSS/JS...'
+          loadingProgress.value = '30%'
           compiledData = await compile(
             htmlLanguage.value,
             jsLanguage.value,
@@ -440,12 +477,17 @@ const useRun = ({
       })
 
       // 编译阶段竞争
+      loadingProgress.value = '50%'
       const compiledData = await Promise.race([compilePromise, compileTimeoutPromise, abortPromise])
 
       // 检查是否已超过总超时
       if (Date.now() - startTime > totalTimeout) {
         throw new Error('运行总时间超时')
       }
+
+      // 更新加载进度
+      loadingText.value = '正在生成预览...'
+      loadingProgress.value = '70%'
 
       let _jsResourcesPlus = []
       let _cssResourcesPlus = []
@@ -482,10 +524,20 @@ const useRun = ({
         }
       }
 
+      // 更新加载进度
+      loadingText.value = '加载完成'
+      loadingProgress.value = '100%'
+
       srcdoc.value = doc
       isNewWindowPreview.value = false
+
+      // 延迟隐藏加载状态，让用户看到完成提示
+      setTimeout(() => {
+        isLoading.value = false
+      }, 300)
     } catch (error) {
       console.error('运行错误:', error)
+      isLoading.value = false
       proxy.$eventEmitter.emit('custom_logs', {
         data: {
           type: 'console',
@@ -680,6 +732,7 @@ defineExpose({
   flex-direction: column;
   background-color: #fff;
   z-index: 9;
+  position: relative;
 
   &.hide {
     display: none;
@@ -694,6 +747,78 @@ defineExpose({
     height: 100%;
     border: none;
     transform-origin: 0 0;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+  }
+
+  .loading-content {
+    text-align: center;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #409eff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .loading-progress {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .cancel-btn {
+    padding: 8px 20px;
+    background: #f56c6c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+
+    &:hover {
+      background: #f45454;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(245, 108, 108, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 </style>
