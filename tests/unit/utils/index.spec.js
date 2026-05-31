@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   parseHtmlContent,
   assembleHtml,
@@ -8,7 +8,12 @@ import {
   utoa,
   atou,
   isMobileDevice,
-  getDeviceConfig
+  getDeviceConfig,
+  newWindowOpenUrl,
+  getBaseUrl,
+  openAppInNewWindow,
+  createShareUrl,
+  createEmbedUrl
 } from '@/utils/index';
 
 describe('parseHtmlContent', () => {
@@ -307,5 +312,159 @@ describe('getDeviceConfig', () => {
     expect(typeof config.lineNumbers).toBe('boolean');
     expect(typeof config.minimap).toBe('boolean');
     expect(typeof config.padding).toBe('number');
+  });
+});
+
+describe('newWindowOpenUrl', () => {
+  let createElementSpy;
+  let clickSpy;
+
+  beforeEach(() => {
+    clickSpy = vi.fn();
+    createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue({
+      click: clickSpy,
+      href: '',
+      target: ''
+    });
+  });
+
+  afterEach(() => {
+    createElementSpy.mockRestore();
+  });
+
+  it('应该创建一个 a 标签', () => {
+    newWindowOpenUrl('https://example.com');
+    expect(createElementSpy).toHaveBeenCalledWith('a');
+  });
+
+  it('应该设置正确的 URL', () => {
+    const mockElement = { click: clickSpy, href: '', target: '' };
+    createElementSpy.mockReturnValue(mockElement);
+
+    newWindowOpenUrl('https://example.com');
+
+    expect(mockElement.href).toBe('https://example.com');
+  });
+
+  it('应该设置 target 为 _blank', () => {
+    const mockElement = { click: clickSpy, href: '', target: '' };
+    createElementSpy.mockReturnValue(mockElement);
+
+    newWindowOpenUrl('https://example.com');
+
+    expect(mockElement.target).toBe('_blank');
+  });
+
+  it('应该触发点击', () => {
+    newWindowOpenUrl('https://example.com');
+    expect(clickSpy).toHaveBeenCalled();
+  });
+});
+
+describe('getBaseUrl', () => {
+  it('应该返回字符串', () => {
+    const result = getBaseUrl();
+    expect(typeof result).toBe('string');
+  });
+
+  it('应该包含 origin', () => {
+    const result = getBaseUrl();
+    expect(result).toContain(window.location.origin);
+  });
+});
+
+describe('openAppInNewWindow', () => {
+  let windowOpenSpy;
+
+  beforeEach(() => {
+    windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('应该调用 window.open', () => {
+    openAppInNewWindow();
+    expect(windowOpenSpy).toHaveBeenCalled();
+  });
+
+  it('应该使用 _blank 目标', () => {
+    openAppInNewWindow();
+    expect(windowOpenSpy).toHaveBeenCalledWith(expect.any(String), '_blank');
+  });
+
+  it('应该生成包含 blank=true 的 URL', () => {
+    openAppInNewWindow();
+    const callArgs = windowOpenSpy.mock.calls[0];
+    expect(callArgs[0]).toContain('blank=true');
+  });
+});
+
+describe('createShareUrl', () => {
+  it('应该生成分享 URL', () => {
+    const id = 'test123';
+    const result = createShareUrl(id);
+
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
+    expect(result).toContain(id);
+  });
+
+  it('应该包含 share 路径', () => {
+    const id = 'test123';
+    const result = createShareUrl(id);
+
+    expect(result).toContain('share');
+  });
+
+  it('应该处理 queryData', () => {
+    const id = 'test123';
+    const queryData = 'encoded-data-string';
+    const result = createShareUrl(id, queryData);
+
+    expect(result).toContain('data=');
+    expect(result).toContain(queryData);
+  });
+
+  it('应该在没有 queryData 时使用 id', () => {
+    const id = 'test123';
+    const result = createShareUrl(id);
+
+    expect(result).toContain(id);
+  });
+});
+
+describe('createEmbedUrl', () => {
+  it('应该生成嵌入 URL', () => {
+    const id = 'test123';
+    const result = createEmbedUrl(id);
+
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
+    expect(result).toContain(id);
+  });
+
+  it('应该包含 embed 标识', () => {
+    const id = 'test123';
+    const result = createEmbedUrl(id);
+
+    expect(result).toContain('embed');
+  });
+
+  it('应该处理 queryData', () => {
+    const id = 'test123';
+    const queryData = 'encoded-data-string';
+    const result = createEmbedUrl(id, queryData);
+
+    expect(result).toContain('data=');
+    expect(result).toContain(queryData);
+  });
+
+  it('应该在没有 queryData 时使用 id', () => {
+    const id = 'test123';
+    const result = createEmbedUrl(id);
+
+    expect(result).toContain(id);
   });
 });
