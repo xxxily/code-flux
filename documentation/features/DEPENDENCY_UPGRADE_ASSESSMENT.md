@@ -75,7 +75,7 @@ Code-Flux 当前是一个 Vue 3 应用，但构建链路仍停留在 Vue CLI 4 /
 - 测试环境为 `happy-dom`。
 - 覆盖率阈值为 75%。
 
-`playwright.config.js:1` 至 `playwright.config.js:30` 显示 E2E 期望本地服务在 `http://localhost:8081`。Vite 迁移时建议保留 8081 端口，降低测试改动面。
+`playwright.config.js:1` 至 `playwright.config.js:30` 显示 E2E 期望本地服务在 `http://localhost:8080`。Vite 迁移时建议统一 8080 端口，降低测试改动面。
 
 ### 2.5 CI 与 Docker
 
@@ -333,9 +333,9 @@ Code-Flux 当前是一个 Vue 3 应用，但构建链路仍停留在 Vue CLI 4 /
    - `publicDir: 'public'`
    - `build.outDir: 'docs'`
    - `resolve.alias['@'] = path.resolve(__dirname, './src')`
-   - `server.port = 8081`
+   - `server.port = 8080`
 2. 更新 npm scripts：
-   - `serve` -> `vite --host 0.0.0.0 --port 8081`
+   - `serve` -> `vite --host 0.0.0.0 --port 8080`
    - `build` -> `vite build`
    - 保留测试脚本。
 3. Monaco worker 迁移：

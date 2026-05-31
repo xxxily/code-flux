@@ -1,0 +1,1 @@
+import{T as e,W as t,b as n,d as r}from"./vendor-vue-B1A3DsP7.js";import{t as i}from"./Preview-BQ1_8dJ4.js";import{t as a}from"./Editor-CXx2eMJa.js";var o={__name:`PreviewOnly`,setup(o){return(o,s)=>(t(),n(r,null,[e(a,{hide:!0}),e(i)],64))}};export{o as default};

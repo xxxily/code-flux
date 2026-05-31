@@ -27,7 +27,7 @@
     "frontend"
   ],
   "scripts": {
-    "serve": "vite --host 0.0.0.0 --port 8081",
+    "serve": "vite --host 0.0.0.0 --port 8080",
     "build": "vite build",
     "lint": "eslint \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "buildConsole": "babel --config-file ./public/console/babel.config.json ./public/console/index.js --out-file ./public/console/compile.js",

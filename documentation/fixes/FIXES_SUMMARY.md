@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
 npm run serve
 
 # 2. 在浏览器中打开
-# http://localhost:8081
+# http://localhost:8080
 
 # 3. 按照 TEST_FIXES.md 中的步骤进行测试
 ```

@@ -168,7 +168,7 @@ describe('编辑器与预览联动', () => {
 // tests/e2e/basic-workflow.spec.js
 test('完整的代码编写和预览流程', async ({ page }) => {
   // 1. 打开页面
-  await page.goto('http://localhost:8081');
+  await page.goto('http://localhost:8080');
   
   // 2. 编写 HTML
   await page.click('[data-editor="html"]');

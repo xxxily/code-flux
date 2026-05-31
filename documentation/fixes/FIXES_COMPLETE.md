@@ -271,7 +271,7 @@ case 'vue3':
 npm run serve
 
 # 2. 在浏览器中打开
-# http://localhost:8081
+# http://localhost:8080
 
 # 3. 按照测试指南进行测试
 open docs/fixes/test-preview-fixes.html
