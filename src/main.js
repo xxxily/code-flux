@@ -10,6 +10,7 @@ import './assets/style/element-theme.less'
 import { ElLoadingDirective } from 'element-plus'
 import 'nprogress/nprogress.css'
 import './assets/iconfont/iconfont.css'
+import './registerServiceWorker'
 
 const create = () => {
   const app = createApp(App)
