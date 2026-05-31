@@ -20,11 +20,9 @@
 在开始发布流程前，确保：
 
 - [ ] 所有计划的功能已完成并合并到主分支
-- [ ] 所有测试通过（`npm test`）
-- [ ] 代码已通过 lint 检查（`npm run lint`）
+- [ ] 本地代码与远程主分支同步
 - [ ] 文档已更新（README、CLAUDE.md 等）
 - [ ] 没有遗留的 TODO 或 FIXME 注释（针对本次发布）
-- [ ] 本地代码与远程主分支同步
 
 ## 发布流程
 
@@ -40,7 +38,34 @@ cat package.json | grep version
 git log --oneline -20
 ```
 
-### 2. 更新版本号
+### 2. 运行质量检查（必须）
+
+在更新版本号前，必须确保代码质量：
+
+```bash
+# 1. 运行 ESLint 检查
+npm run lint
+
+# 2. 运行所有测试
+npm test
+```
+
+**质量检查标准**：
+
+- **测试必须全部通过**：任何测试失败都必须修复后才能发布
+- **Lint 错误处理**：
+  - 功能性错误（如语法错误、逻辑错误）必须修复
+  - 代码规范问题（如未使用的变量）可以：
+    - 优先选择：立即修复后再发布
+    - 备选方案：记录为技术债务，发布后立即修复
+  - 使用 `npm run lint -- --fix` 尝试自动修复
+
+**重要**：如果选择带 lint 警告发布，必须：
+1. 在 CHANGELOG 中说明存在的代码规范问题
+2. 创建 Issue 跟踪这些问题
+3. 在下一个版本中优先修复
+
+### 3. 更新版本号
 
 编辑 `package.json`，更新 `version` 字段：
 
@@ -50,7 +75,7 @@ git log --oneline -20
 }
 ```
 
-### 3. 更新 CHANGELOG
+### 4. 更新 CHANGELOG
 
 编辑 `changeLog.md`，在文件顶部添加新版本的更新日志：
 
@@ -80,17 +105,38 @@ git log --oneline -20
 * 添加测试实施指南和策略文档
 ```
 
-### 4. 提交版本更新
+### 5. 构建生产版本（必须）
+
+构建项目并生成部署文件到 `docs` 目录（用于 GitHub Pages）：
 
 ```bash
-# 添加修改的文件
-git add package.json changeLog.md
+# 构建生产版本
+npm run build
+
+# 验证构建结果
+ls -la docs/
+
+# 检查构建产物是否正常
+# - docs/index.html 应该存在
+# - docs/js/ 和 docs/css/ 目录应该包含打包后的文件
+```
+
+**重要**：
+- 构建输出目录为 `./docs/`（配置在 `vue.config.js` 中）
+- GitHub Pages 会自动从 `docs` 目录部署网站
+- 必须将 `docs` 目录的变更一起提交
+
+### 6. 提交版本更新
+
+```bash
+# 添加修改的文件（包括构建产物）
+git add package.json changeLog.md docs/
 
 # 提交（使用规范的提交信息）
 git commit -m "chore: 发布 v1.2.4 版本"
 ```
 
-### 5. 创建 Git Tag
+### 7. 创建 Git Tag
 
 ```bash
 # 创建带注释的标签
@@ -106,10 +152,10 @@ git tag -a v1.2.4 -m "Release v1.2.4
 git tag -l | tail -5
 ```
 
-### 6. 推送到远程仓库
+### 8. 推送到远程仓库
 
 ```bash
-# 推送代码
+# 推送代码（包括 docs 目录的构建产物）
 git push origin main
 
 # 推送标签
@@ -119,7 +165,9 @@ git push origin v1.2.4
 git push origin --tags
 ```
 
-### 7. 验证发布
+**重要**：推送后 GitHub Pages 会自动部署 `docs` 目录的内容到 https://code-flux.anzz.top
+
+### 9. 验证发布
 
 ```bash
 # 验证远程标签
@@ -127,21 +175,23 @@ git ls-remote --tags origin
 
 # 验证 GitHub Release（如果配置了自动发布）
 # 访问：https://github.com/xxxily/code-flux/releases
+
+# 验证 GitHub Pages 部署
+# 访问：https://code-flux.anzz.top
+# 检查页面是否正常加载，版本号是否更新
 ```
 
-### 8. 构建和部署（可选）
+### 10. 构建和部署（可选）
 
-如果需要部署到生产环境：
+如果需要部署到其他环境（非 GitHub Pages）：
 
 ```bash
-# 构建生产版本
-npm run build
-
-# 部署到服务器（根据实际部署方式）
-# 例如：使用 Docker
+# 使用 Docker 部署
 npm run docker:build
 npm run docker:up
 ```
+
+**注意**：GitHub Pages 部署已在步骤 8 推送代码时自动完成。
 
 ## 快速发布命令
 
@@ -152,20 +202,27 @@ npm run docker:up
 git checkout main
 git pull origin main
 
-# 2. 运行测试
+# 2. 运行质量检查（必须）
+npm run lint
 npm test
 
 # 3. 手动编辑 package.json 和 changeLog.md
 
-# 4. 提交并打标签（替换版本号）
+# 4. 构建生产版本（必须）
+npm run build
+
+# 5. 提交并打标签（替换版本号）
 VERSION="1.2.4"
-git add package.json changeLog.md
+git add package.json changeLog.md docs/
 git commit -m "chore: 发布 v${VERSION} 版本"
 git tag -a "v${VERSION}" -m "Release v${VERSION}"
 
-# 5. 推送
+# 6. 推送（会自动触发 GitHub Pages 部署）
 git push origin main
 git push origin "v${VERSION}"
+
+# 7. 验证部署
+# 访问 https://code-flux.anzz.top 检查是否更新
 ```
 
 ## 发布后工作
