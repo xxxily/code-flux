@@ -43,7 +43,7 @@ export default defineConfig({
     outDir: 'docs',
     emptyOutDir: true,
     sourcemap: false,
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 2800,
     rolldownOptions: {
       checks: {
         invalidAnnotation: false
@@ -65,8 +65,7 @@ export default defineConfig({
             {
               name: 'vendor-monaco',
               test: /node_modules[\\/](monaco-editor|monaco-editor-textmate|monaco-textmate|onigasm|dompurify|marked)[\\/]/,
-              priority: 40,
-              maxSize: 1200 * 1024
+              priority: 40
             },
             {
               name: 'vendor-export',

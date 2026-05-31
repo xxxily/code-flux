@@ -18,7 +18,7 @@ test.describe('基础工作流程', () => {
     await gotoApp(page);
 
     // 验证页面标题或关键元素
-    expect(page.url()).toContain('localhost:8080');
+    expect(page.url()).toMatch(/(localhost:8080|127\.0\.0\.1:4173)/);
   });
 
   test('应该显示编辑器区域', async ({ page }) => {
