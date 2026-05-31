@@ -96,64 +96,52 @@ const html = (preprocessor, code) => {
 /**
  * @Desc: 编译js
  */
-const js = (preprocessor, code, importMap) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // 加载babel解析器
-      await load(['babel'])
-      let _code = ''
-      switch (preprocessor) {
-        case 'javascript':
-          resolve(transformJsImport(code, importMap))
-          break
-        case 'babel':
-          _code = window.Babel.transform(code, {
-            presets: [
-              'env',
-              // 'es2015',
-              // 'es2016',
-              // 'es2017',
-              'react'
-            ]
-          }).code
-          resolve({
-            useImport: false,
-            js: _code
-          })
-          break
-        case 'typescript':
-          _code = window.ts.transpileModule(code, {
-            reportDiagnostics: true,
-            compilerOptions: {
-              module: 'es2015'
-            }
-          }).outputText
-          resolve(transformJsImport(_code, importMap))
-          break
-        case 'coffeescript':
-          _code = window.CoffeeScript.compile(code)
-          resolve(transformJsImport(_code, importMap))
-          break
-        case 'livescript': {
-          const liveScript = window.require('livescript')
-          _code = liveScript.compile(code)
-          resolve({
-            useImport: false,
-            js: _code
-          })
-          break
+const js = async (preprocessor, code, importMap) => {
+  // 加载babel解析器
+  await load(['babel'])
+  let _code = ''
+  switch (preprocessor) {
+      case 'javascript':
+        return transformJsImport(code, importMap)
+      case 'babel':
+        _code = window.Babel.transform(code, {
+          presets: [
+            'env',
+            // 'es2015',
+            // 'es2016',
+            // 'es2017',
+            'react'
+          ]
+        }).code
+        return {
+          useImport: false,
+          js: _code
         }
-        default:
-          resolve({
-            useImport: false,
-            js: ''
-          })
-          break
+      case 'typescript':
+        _code = window.ts.transpileModule(code, {
+          reportDiagnostics: true,
+          compilerOptions: {
+            module: 'es2015'
+          }
+        }).outputText
+        return transformJsImport(_code, importMap)
+      case 'coffeescript':
+        _code = window.CoffeeScript.compile(code)
+        return transformJsImport(_code, importMap)
+      case 'livescript': {
+        const liveScript = window.require('livescript')
+        _code = liveScript.compile(code)
+        return {
+          useImport: false,
+          js: _code
+        }
       }
-    } catch (error) {
-      reject(error)
+      default:
+        return {
+          useImport: false,
+          js: ''
+        }
     }
-  })
 }
 
 /**
@@ -440,58 +428,49 @@ const parseVueComponentData = async (
 /**
  * @Desc: 编译vue单文件
  */
-const vue = (preprocessor, code, importMap) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let componentData
-      let parseData
-      switch (preprocessor) {
-        case 'vue2':
-          componentData = window.VueTemplateCompiler.parseComponent(code)
-          parseData = await parseVueComponentData(
-            componentData,
-            parseVue2ScriptPlugin,
-            'vue2',
-            importMap
-          )
-          resolve(parseData)
-          break
-        case 'vue3':
-          componentData = window.Vue3TemplateCompiler.parse(code)
-          // 使用了setup语法
-          if (componentData.descriptor.scriptSetup) {
-            componentData.descriptor.script = null
-            let compiledScript = window.Vue3TemplateCompiler.compileScript(
-              componentData.descriptor,
-              {
-                inlineTemplate: true,
-                // refSugar 已废弃，移除此选项
-                id: Math.random() + ''
-              }
-            )
-            componentData.descriptor.script = {
-              content: compiledScript.content
-            }
+const vue = async (preprocessor, code, importMap) => {
+  let componentData
+  let parseData
+  switch (preprocessor) {
+    case 'vue2':
+      componentData = window.VueTemplateCompiler.parseComponent(code)
+      parseData = await parseVueComponentData(
+        componentData,
+        parseVue2ScriptPlugin,
+        'vue2',
+        importMap
+      )
+      return parseData
+    case 'vue3':
+      componentData = window.Vue3TemplateCompiler.parse(code)
+      // 使用了setup语法
+      if (componentData.descriptor.scriptSetup) {
+        componentData.descriptor.script = null
+        let compiledScript = window.Vue3TemplateCompiler.compileScript(
+          componentData.descriptor,
+          {
+            inlineTemplate: true,
+            // refSugar 已废弃，移除此选项
+            id: Math.random() + ''
           }
-          parseData = await parseVueComponentData(
-            componentData.descriptor,
-            parseVue3ScriptPlugin,
-            'vue3',
-            importMap
-          )
-          resolve(parseData)
-          break
-        default:
-          resolve({
-            useImport: false,
-            js: ''
-          })
-          break
+        )
+        componentData.descriptor.script = {
+          content: compiledScript.content
+        }
       }
-    } catch (error) {
-      reject(error)
-    }
-  })
+      parseData = await parseVueComponentData(
+        componentData.descriptor,
+        parseVue3ScriptPlugin,
+        'vue3',
+        importMap
+      )
+      return parseData
+    default:
+      return {
+        useImport: false,
+        js: ''
+      }
+  }
 }
 
 export default {

@@ -157,7 +157,8 @@ const route = useRoute()
 // 添加移动端判断
 const isMobile = isMobileDevice()
 
-// 判断是否为 Mac 系统
+// 判断是否为 Mac 系统（预留用于显示不同的快捷键提示）
+// eslint-disable-next-line no-unused-vars
 const isMac = /macintosh|mac os x/i.test(navigator.userAgent)
 
 // 是否存在可用的url

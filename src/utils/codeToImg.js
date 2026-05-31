@@ -130,6 +130,8 @@ const deleteElement = el => {
 }
 
 // 生成代码图片
+// editor 参数保留作为 API 的一部分，即使当前未使用
+// eslint-disable-next-line no-unused-vars
 export const codeToImg = ({ editor, themeData, delay, ...data }) => {
   return new Promise(resolve => {
     const { el, editorEl } = createElement(data, themeData)

@@ -44,7 +44,8 @@ const store = useStore()
 const editData = computed(() => store.state.editData)
 const proxy = getCurrentInstance().proxy
 const dialogVisible = ref(false)
-proxy.$eventEmitter.on('show_edit_importmap_dialog', item => {
+// item 参数未使用
+proxy.$eventEmitter.on('show_edit_importmap_dialog', () => {
   dialogVisible.value = true
 })
 

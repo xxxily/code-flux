@@ -197,6 +197,8 @@ const { resizeInit, containerWidth, containerHeight } = useResizeInit({
   sizeList
 })
 // 添加收起/展开功能
+// collapseItem 和 expandItem 通过 provide 提供给子组件使用
+// eslint-disable-next-line no-unused-vars
 const { collapseItem, expandItem } = useCollapseExpand({
   resize,
   props,

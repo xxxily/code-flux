@@ -339,37 +339,34 @@ const store = createStore({
     }
   },
   actions: {
-    getData(ctx, { id, data, blank }) {
-      return new Promise(async (resolve, reject) => {
-        try {
-          let parseData = createDefaultData(blank || false)
-          if (id) {
-            let { data } = await request(`GET /gists/${id}`, {
-              gist_id: id
-            })
-            parseData = JSON.parse(data.files['coderun.json'].content)
-          } else if (data) {
-            parseData = JSON.parse(atou(data))
-          }
-          
-          // 如果不同步布局，则保持当前布局不变
-          if (!ctx.state.editData.config.syncLayout) {
-            const currentLayout = ctx.state.editData.config.layout
-            parseData.config.layout = currentLayout
-          }
-          
-          // 保留当前的 saveCallback
-          const currentCallback = ctx.state.editData.config.saveCallback
-          parseData.config.saveCallback = currentCallback
-          
-          ctx.commit('setEditData', parseData)
-          resolve()
-        } catch (e) {
-          console.log(e)
-          ElMessage.error('请求失败')
-          reject(e)
+    async getData(ctx, { id, data, blank }) {
+      try {
+        let parseData = createDefaultData(blank || false)
+        if (id) {
+          let { data } = await request(`GET /gists/${id}`, {
+            gist_id: id
+          })
+          parseData = JSON.parse(data.files['coderun.json'].content)
+        } else if (data) {
+          parseData = JSON.parse(atou(data))
         }
-      })
+
+        // 如果不同步布局，则保持当前布局不变
+        if (!ctx.state.editData.config.syncLayout) {
+          const currentLayout = ctx.state.editData.config.layout
+          parseData.config.layout = currentLayout
+        }
+
+        // 保留当前的 saveCallback
+        const currentCallback = ctx.state.editData.config.saveCallback
+        parseData.config.saveCallback = currentCallback
+
+        ctx.commit('setEditData', parseData)
+      } catch (e) {
+        console.log(e)
+        ElMessage.error('请求失败')
+        throw e
+      }
     },
 
     saveGithubToken(ctx, githubToken) {

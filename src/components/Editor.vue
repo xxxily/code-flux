@@ -8,9 +8,9 @@
     <!-- 标签页模式 -->
     <div v-if="show && isTabsMode" class="tabs-mode">
       <el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
-        <el-tab-pane 
-          v-for="(item, index) in editorItemList" 
-          :key="item.title" 
+        <el-tab-pane
+          v-for="item in editorItemList"
+          :key="item.title"
           :label="item.title" 
           :name="item.title"
         >
@@ -421,32 +421,30 @@ const useEditorChange = ({
   // 清空所有代码
   const clearAllCode = async (skipConfirm = false) => {
     // 返回一个Promise，用于通知调用方清空操作的结果
-    return new Promise(async (resolve, reject) => {
-      try {
-        // 检查是否有内容需要清空
-        const hasContent = editorItemList.value.some(item => item.content && item.content.trim() !== '') ||
-          Object.values(store.state.editData.code).some(editor => editor.content && editor.content.trim() !== '')
+    try {
+      // 检查是否有内容需要清空
+      const hasContent = editorItemList.value.some(item => item.content && item.content.trim() !== '') ||
+        Object.values(store.state.editData.code).some(editor => editor.content && editor.content.trim() !== '')
 
-        // 有内容且需要确认时显示确认对话框
-        if (hasContent && !skipConfirm) {
-          try {
-            await ElMessageBox.confirm(
-              '清空代码操作不可恢复，确定要清空所有代码吗？',
-              '警告',
-              {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning',
-              }
-            )
-          } catch (error) {
-            // 用户取消操作
-            resolve(false)
-            return
-          }
+      // 有内容且需要确认时显示确认对话框
+      if (hasContent && !skipConfirm) {
+        try {
+          await ElMessageBox.confirm(
+            '清空代码操作不可恢复，确定要清空所有代码吗？',
+            '警告',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }
+          )
+        } catch (error) {
+          // 用户取消操作
+          return false
         }
+      }
 
-        // 先销毁所有编辑器实例
+      // 先销毁所有编辑器实例
         if (editorItemRefs.value && editorItemRefs.value.length > 0) {
           editorItemRefs.value.forEach(editor => {
             if (editor && editor.disposeEditor) {
@@ -475,17 +473,16 @@ const useEditorChange = ({
           })
         }
 
-        if (hasContent &&!skipConfirm) {
+        if (hasContent && !skipConfirm) {
           ElMessage.success('已清空所有代码')
         }
-        
-        resolve(true)
+
+        return true
       } catch (error) {
         console.error('清空代码失败:', error)
         ElMessage.error('清空代码失败')
-        reject(error)
+        return false
       }
-    })
   }
 
   // 代码修改事件
@@ -585,6 +582,8 @@ const { activeTab, isTabsMode, handleTabClick, editorItemRefs } = useTabsMode({ 
 const { loadTheme, getThemeData } = useTheme({ codeTheme, proxy })
 const { runCode } = useRunCode({ store, proxy })
 const { autoRun } = useAutoRun({ store, runCode })
+// resetCode 通过事件监听器使用
+// eslint-disable-next-line no-unused-vars
 const { getIndexByType, preprocessorChange, codeChange, clearAllCode, resetCode } = useEditorChange({
   setInitData,
   store,

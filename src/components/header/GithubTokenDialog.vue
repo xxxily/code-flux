@@ -36,6 +36,7 @@ import { isMobileDevice } from '@/utils'
 
 const isMobile = isMobileDevice()
 
+// eslint-disable-next-line no-unused-vars
 const props = defineProps({
   modelValue: Boolean
 })

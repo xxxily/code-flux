@@ -70,7 +70,9 @@ function corsEnabled(url) {
 
   try {
     xhr.send()
-  } catch (e) {}
+  } catch (e) {
+    // 忽略发送错误
+  }
 
   return xhr.status >= 200 && xhr.status <= 299
 } // `a.click()` doesn't work for all browsers (#465)

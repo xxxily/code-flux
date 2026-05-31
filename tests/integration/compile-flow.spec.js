@@ -12,9 +12,9 @@ vi.mock('@/utils/load', () => ({
 vi.mock('@/utils/transform', () => ({
   default: {
     html: vi.fn((lang, content) => Promise.resolve(content)),
-    js: vi.fn((lang, content, _importMap) => Promise.resolve({ js: content })),
+    js: vi.fn((lang, content) => Promise.resolve({ js: content })),
     css: vi.fn((lang, content) => Promise.resolve(content)),
-    vue: vi.fn((_lang, _content, _importMap) => Promise.resolve({
+    vue: vi.fn(() => Promise.resolve({
       html: '<div>vue compiled</div>',
       css: '',
       js: { js: 'console.log("vue");' }

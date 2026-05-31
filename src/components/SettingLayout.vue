@@ -28,6 +28,8 @@
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { layoutList, previewImgMap } from '@/config/constants'
+// ElButton 在注释的代码中使用，保留以便将来启用
+// eslint-disable-next-line no-unused-vars
 import { ElSelect, ElButton, ElOption, ElDivider } from 'element-plus'
 
 // 初始化
@@ -69,6 +71,8 @@ const useLayout = ({ store }) => {
 
 // created部分
 const { store } = useInit()
+// confirm 在注释的代码中使用，保留以便将来启用
+// eslint-disable-next-line no-unused-vars
 const { previewImg, layout, confirm, layoutChange } = useLayout({ store })
 </script>
 

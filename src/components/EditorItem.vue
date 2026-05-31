@@ -555,6 +555,8 @@ const { preprocessor, preprocessorChange } = usePreprocessor({
   emit,
   updateDoc
 })
+// resize 在模板事件中被调用
+// eslint-disable-next-line no-unused-vars
 const { noSpace, resize } = useSizeChange({ props, relayoutEditor })
 const { addResource, addImportMap } = useResource({ emit })
 const { codeFormatter } = useCodeFormat({ getValue, updateDoc, emit })

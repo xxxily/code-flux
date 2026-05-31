@@ -165,15 +165,8 @@ const useLog = ({ proxy }) => {
 const useCreateHtml = () => {
   // 为外部资源添加超时和错误处理
   const createResourceWithTimeout = (url, type, timeout = 10000) => {
-    return `
-      <script data-assist-code="true">
-        (function() {
-          const timer = setTimeout(function() {
-            console.warn('资源加载超时: ${url}');
-          }, ${timeout});
-
-          ${type === 'css' ? `
-            const link = document.createElement('link');
+    const createCssLoader = () => {
+      return `const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = '${url}';
             link.onload = function() { clearTimeout(timer); };
@@ -181,20 +174,30 @@ const useCreateHtml = () => {
               clearTimeout(timer);
               console.error('CSS加载失败: ${url}');
             };
-            document.head.appendChild(link);
-          ` : `
-            const script = document.createElement('script');
+            document.head.appendChild(link);`
+    }
+
+    const createJsLoader = () => {
+      return `const script = document.createElement('script');
             script.src = '${url}';
             script.onload = function() { clearTimeout(timer); };
             script.onerror = function() {
               clearTimeout(timer);
               console.error('JS加载失败: ${url}');
             };
-            document.head.appendChild(script);
-          `}
-        })();
-      <\/script>
-    `
+            document.head.appendChild(script);`
+    }
+
+    const loaderCode = type === 'css' ? createCssLoader() : createJsLoader()
+
+    return [
+      '<script data-assist-code="true">',
+      '(function() {',
+      `const timer = setTimeout(function() { console.warn('资源加载超时: ${url}'); }, ${timeout});`,
+      loaderCode,
+      '})();',
+      '<' + '/script>'
+    ].join('')
   }
 
   // 生成html结构
@@ -221,24 +224,24 @@ const useCreateHtml = () => {
       })
       .join('\n')
 
-    const erudaCode = `
-      <script data-assist-code="true" src="${base}eruda/eruda.js"><\/script>
-      <script data-assist-code="true">window.eruda && eruda.init();<\/script>
-    `
+    const erudaScript1 = '<script data-assist-code="true" src="' + base + 'eruda/eruda.js"><' + '/script>'
+    const erudaScript2 = '<script data-assist-code="true">window.eruda && eruda.init();<' + '/script>'
+    const erudaCode = erudaScript1 + erudaScript2
 
-    let head = `
-      <title>预览<\/title>
-      <style type="text/css">
-          ${cssStr}
-      <\/style>
-      ${openAlmightyConsole? erudaCode : ''}
-      <script data-assist-code="true" src="${base}base/index.js"><\/script>
-      <script data-assist-code="true" src="${base}console/${dev ? 'index.js' : 'compile.js'}"><\/script>
-      ${_cssResources}
-    `
+    const headParts = [
+      '<title>预览<' + '/title>',
+      '<style type="text/css">',
+      cssStr,
+      '<' + '/style>',
+      openAlmightyConsole ? erudaCode : '',
+      '<script data-assist-code="true" src="' + base + 'base/index.js"><' + '/script>',
+      '<script data-assist-code="true" src="' + base + 'console/' + (dev ? 'index.js' : 'compile.js') + '"><' + '/script>',
+      _cssResources
+    ]
+    let head = headParts.join('')
 
     let jsContent = ''
-    let successRunNotify = `<script data-assist-code="true">window.parent.postMessage({type: 'successRun'})<\/script>`
+    let successRunNotify = '<script data-assist-code="true">window.parent.postMessage({type: \'successRun\'})<' + '/script>'
 
     // 出错运行通知已经在console/index.js中处理过了，这里不再处理
     // let errorRunNotify = `window.parent.postMessage({type: 'errorRun'})`
@@ -250,19 +253,18 @@ const useCreateHtml = () => {
     if (useImport) {
       // 使用了importmap
       if (importMap) {
-        jsContent += `<script type="importmap">
-          ${JSON.stringify(importMap)}
-        <\/script>`
+        jsContent += '<script type="importmap">' +
+          JSON.stringify(importMap) +
+          '<' + '/script>'
       }
 
-      jsContent += `
-      <script type="module">
-        ${jsStr}
-      <\/script>`
+      jsContent += '<script type="module">' +
+        jsStr +
+        '<' + '/script>'
     } else {
-      jsContent += `<script>
-        ${jsStr}
-      <\/script>`
+      jsContent += '<script>' +
+        jsStr +
+        '<' + '/script>'
     }
 
     // 运行成功通知
@@ -299,8 +301,8 @@ const useRun = ({
   cssResources,
   jsResources,
   importMap,
-  createHtml,
-  log
+  createHtml
+  // log 参数未使用，已移除
 }) => {
   // 预览的文档内容
   const srcdoc = ref('')
@@ -331,7 +333,8 @@ const useRun = ({
   const loadingText = ref('正在初始化...')
   const loadingProgress = ref('')
 
-  // 取消运行
+  // 取消运行（在模板中被调用）
+  // eslint-disable-next-line no-unused-vars
   const cancelRun = () => {
     if (runAbortController.value) {
       runAbortController.value.abort()
@@ -423,8 +426,6 @@ const useRun = ({
 
       // 编译阶段
       const compilePromise = (async () => {
-        let _jsResourcesPlus = []
-        let _cssResourcesPlus = []
         let compiledData = null
 
         // vue单文件
@@ -680,6 +681,8 @@ const {
   vueLanguage,
   vueContent
 } = useInitData()
+// log 未使用，但保留以便将来使用
+// eslint-disable-next-line no-unused-vars
 const { log } = useLog({ proxy })
 const { createHtml } = useCreateHtml()
 const { srcdoc, run, runStartTime, iframeKey } = useRun({
@@ -699,8 +702,8 @@ const { srcdoc, run, runStartTime, iframeKey } = useRun({
   cssResources,
   jsResources,
   importMap,
-  createHtml,
-  log
+  createHtml
+  // log 已从 useRun 参数中移除
 })
 useNewWindowPreview({
   newWindowPreviewData,
