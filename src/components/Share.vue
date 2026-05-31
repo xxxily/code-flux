@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, defineProps, defineExpose } from 'vue'
+import { ref, nextTick } from 'vue'
 import { ElDialog, ElInput } from 'element-plus'
 import {
   createShareUrl as createShareUrlUtil,

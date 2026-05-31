@@ -17,7 +17,6 @@
 import {
   ref,
   getCurrentInstance,
-  defineProps,
   watch,
   nextTick,
   computed

@@ -88,7 +88,7 @@
           </el-tooltip>
           <!-- 选择语言 -->
           <el-select
-            size="mini"
+            size="small"
             style="min-width: 78px"
             v-model="preprocessor"
             @change="preprocessorChange"
@@ -117,14 +117,11 @@
 <script setup>
 import {
   ref,
-  defineProps,
   onBeforeUnmount,
   onMounted,
   watch,
   nextTick,
-  defineEmits,
   getCurrentInstance,
-  defineExpose
 } from 'vue'
 import ResizeObserver from 'resize-observer-polyfill'
 import {
@@ -655,14 +652,14 @@ defineExpose({
         }
       }
 
-      /deep/ .el-input__inner {
+      :deep(.el-input__inner) {
         // width: 120px;
         background-color: transparent;
         border-color: var(--editor-header-color);
         color: var(--editor-header-color);
       }
 
-      /deep/ .el-select .el-input .el-select__caret {
+      :deep(.el-select .el-input .el-select__caret) {
         color: var(--editor-header-color);
       }
 

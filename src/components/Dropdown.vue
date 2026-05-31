@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeUnmount, defineProps, defineEmits } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 
 // eslint-disable-next-line no-unused-vars
 const props = defineProps({

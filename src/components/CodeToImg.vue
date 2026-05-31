@@ -98,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineExpose, defineProps, nextTick } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { codeToImg } from '@/utils/codeToImg'
 import { ElButton, ElDialog, ElSwitch, ElInputNumber } from 'element-plus'
 import 'cropperjs/dist/cropper.css'
@@ -304,7 +304,7 @@ defineExpose({
   }
 }
 
-/deep/ .codeImgPreviewDialog {
+:deep(.codeImgPreviewDialog) {
   .el-dialog__body {
     display: flex;
     justify-content: center;

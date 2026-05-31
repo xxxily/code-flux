@@ -856,7 +856,7 @@ const { createShareUrl, createEmbedUrl, createEmbedCode } = useShare(hasQueryDat
   }
 }
 
-/deep/ .settingDialog {
+:deep(.settingDialog) {
   .el-dialog__header {
     background-color: var(--header-background);
     color: var(--header-logo-color);
@@ -912,7 +912,7 @@ const { createShareUrl, createEmbedUrl, createEmbedCode } = useShare(hasQueryDat
   color: var(--dropdown-color);
 }
 
-/deep/ .el-drawer__body {
+:deep(.el-drawer__body) {
   overflow: hidden;
 
   .gistBox {

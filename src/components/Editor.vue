@@ -131,7 +131,6 @@
 <script setup>
 import {
   ref,
-  defineProps,
   onMounted,
   onBeforeUnmount,
   computed,
@@ -761,7 +760,7 @@ const handleDrop = async (e) => {
   }
 }
 
-/deep/ .el-dialog__body {
+:deep(.el-dialog__body) {
   padding: 20px;
   
   @media screen and (max-width: 980px) {

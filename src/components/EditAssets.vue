@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, computed, defineExpose } from 'vue'
+import { ref, getCurrentInstance, computed } from 'vue'
 import {
   ElButton,
   ElDialog,

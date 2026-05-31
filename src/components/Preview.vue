@@ -27,12 +27,10 @@
 <script setup>
 import {
   ref,
-  defineProps,
   computed,
   onBeforeUnmount,
   getCurrentInstance,
   watch,
-  defineExpose,
   nextTick
 } from 'vue'
 import { useStore } from 'vuex'
@@ -333,8 +331,6 @@ const useRun = ({
   const loadingText = ref('正在初始化...')
   const loadingProgress = ref('')
 
-  // 取消运行（在模板中被调用）
-  // eslint-disable-next-line no-unused-vars
   const cancelRun = () => {
     if (runAbortController.value) {
       runAbortController.value.abort()
@@ -575,7 +571,11 @@ const useRun = ({
     srcdoc,
     run,
     runStartTime,
-    iframeKey
+    iframeKey,
+    isLoading,
+    loadingText,
+    loadingProgress,
+    cancelRun
   }
 }
 
@@ -685,7 +685,16 @@ const {
 // eslint-disable-next-line no-unused-vars
 const { log } = useLog({ proxy })
 const { createHtml } = useCreateHtml()
-const { srcdoc, run, runStartTime, iframeKey } = useRun({
+const {
+  srcdoc,
+  run,
+  runStartTime,
+  iframeKey,
+  isLoading,
+  loadingText,
+  loadingProgress,
+  cancelRun
+} = useRun({
   store,
   isNewWindowPreview,
   newWindowPreviewData,

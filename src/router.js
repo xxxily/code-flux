@@ -1,12 +1,13 @@
-import Edit from '@/pages/edit/Index.vue'
-import Preview from '@/pages/edit/Preview.vue'
-import Embed from '@/pages/embed/Index.vue'
 import {
   createRouter,
   createWebHistory,
   createWebHashHistory
 } from 'vue-router'
 import { routerMode, base } from './config'
+
+const Edit = () => import('@/pages/edit/Index.vue')
+const Preview = () => import('@/pages/edit/Preview.vue')
+const Embed = () => import('@/pages/embed/Index.vue')
 
 const routes = [
   {

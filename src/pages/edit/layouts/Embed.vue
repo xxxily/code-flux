@@ -99,7 +99,6 @@
 
 <script setup>
 import {
-  defineProps,
   ref,
   computed,
   watch,

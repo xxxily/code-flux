@@ -23,7 +23,10 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals.vitest
+        ...globals.vitest,
+        defineEmits: 'readonly',
+        defineExpose: 'readonly',
+        defineProps: 'readonly'
       }
     },
     linterOptions: {

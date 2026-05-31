@@ -16,25 +16,27 @@ import tabs2Img from '../assets/layoutImgs/default.jpg'
 import tabs3Img from '../assets/layoutImgs/default.jpg'
 import tabs4Img from '../assets/layoutImgs/default.jpg'
 
+import { defineAsyncComponent } from 'vue'
+
 // 布局组件
-import Default from '../pages/edit/layouts/Default.vue'
-import Default2 from '../pages/edit/layouts/Default2.vue'
-import Edit from '../pages/edit/layouts/Edit.vue'
-import Edit2 from '../pages/edit/layouts/Edit2.vue'
-import EditOnly from '../pages/edit/layouts/EditOnly.vue'
-import EditOnly2 from '../pages/edit/layouts/EditOnly2.vue'
-import PreviewOnly from '../pages/edit/layouts/PreviewOnly.vue'
-import PreviewOnly2 from '../pages/edit/layouts/PreviewOnly2.vue'
-import Js from '../pages/edit/layouts/Js.vue'
-import NewWindowPreview from '../pages/edit/layouts/NewWindowPreview.vue'
-import VueSFC from '../pages/edit/layouts/VueSFC.vue'
-import Embed from '../pages/edit/layouts/Embed.vue'
-import Tabs from '../pages/edit/layouts/Tabs.vue'
-import Edit3 from '../pages/edit/layouts/Edit3.vue'
-import Edit4 from '../pages/edit/layouts/Edit4.vue'
-import Tabs2 from '../pages/edit/layouts/Tabs2.vue'
-import Tabs3 from '../pages/edit/layouts/Tabs3.vue'
-import Tabs4 from '../pages/edit/layouts/Tabs4.vue'
+const Default = defineAsyncComponent(() => import('../pages/edit/layouts/Default.vue'))
+const Default2 = defineAsyncComponent(() => import('../pages/edit/layouts/Default2.vue'))
+const Edit = defineAsyncComponent(() => import('../pages/edit/layouts/Edit.vue'))
+const Edit2 = defineAsyncComponent(() => import('../pages/edit/layouts/Edit2.vue'))
+const EditOnly = defineAsyncComponent(() => import('../pages/edit/layouts/EditOnly.vue'))
+const EditOnly2 = defineAsyncComponent(() => import('../pages/edit/layouts/EditOnly2.vue'))
+const PreviewOnly = defineAsyncComponent(() => import('../pages/edit/layouts/PreviewOnly.vue'))
+const PreviewOnly2 = defineAsyncComponent(() => import('../pages/edit/layouts/PreviewOnly2.vue'))
+const Js = defineAsyncComponent(() => import('../pages/edit/layouts/Js.vue'))
+const NewWindowPreview = defineAsyncComponent(() => import('../pages/edit/layouts/NewWindowPreview.vue'))
+const VueSFC = defineAsyncComponent(() => import('../pages/edit/layouts/VueSFC.vue'))
+const Embed = defineAsyncComponent(() => import('../pages/edit/layouts/Embed.vue'))
+const Tabs = defineAsyncComponent(() => import('../pages/edit/layouts/Tabs.vue'))
+const Edit3 = defineAsyncComponent(() => import('../pages/edit/layouts/Edit3.vue'))
+const Edit4 = defineAsyncComponent(() => import('../pages/edit/layouts/Edit4.vue'))
+const Tabs2 = defineAsyncComponent(() => import('../pages/edit/layouts/Tabs2.vue'))
+const Tabs3 = defineAsyncComponent(() => import('../pages/edit/layouts/Tabs3.vue'))
+const Tabs4 = defineAsyncComponent(() => import('../pages/edit/layouts/Tabs4.vue'))
 
 // Monaco Editor支持的语言
 export const supportLanguage = {

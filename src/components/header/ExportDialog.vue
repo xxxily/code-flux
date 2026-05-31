@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineExpose, defineProps, defineEmits } from 'vue'
+import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ElDialog, ElInput, ElButton, ElMessage } from 'element-plus'
 import exportZip from '@/utils/exportZip'

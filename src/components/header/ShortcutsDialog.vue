@@ -17,7 +17,7 @@
 
 <script setup>
 import { shortcuts } from '@/config/shortcuts'
-import { defineProps, defineEmits, computed } from 'vue'
+import { computed } from 'vue'
 import { ElDialog } from 'element-plus'
 import { isMobileDevice } from '@/utils'
 

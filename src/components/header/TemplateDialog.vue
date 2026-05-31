@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, computed, getCurrentInstance, nextTick, defineProps, defineEmits } from 'vue'
+import { ref, computed, getCurrentInstance, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import templateList from '@/config/templates'
 import { ElDialog } from 'element-plus'

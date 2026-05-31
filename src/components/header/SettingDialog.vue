@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, computed, shallowRef, defineProps, defineEmits } from 'vue'
+import { ref, computed, shallowRef } from 'vue'
 import { ElDialog, ElTabs, ElTabPane } from 'element-plus'
 import Setting from '../Setting.vue'
 import SettingLayout from '../SettingLayout.vue'

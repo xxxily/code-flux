@@ -291,7 +291,7 @@ const {
       .textarea {
         height: 100%;
 
-        /deep/ .el-textarea__inner {
+        :deep(.el-textarea__inner) {
           height: 100%;
           resize: none;
           background-color: var(--editor-background);

@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted, provide, onBeforeUnmount } from 'vue'
+import { ref, onMounted, provide, onBeforeUnmount } from 'vue'
 import Resize from '@/utils/Resize.js'
 import ResizeObserver from 'resize-observer-polyfill'
 

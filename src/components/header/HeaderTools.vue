@@ -113,8 +113,6 @@ import {
   computed,
   onBeforeUnmount,
   getCurrentInstance,
-  defineProps,
-  defineEmits,
   onMounted,
   onUnmounted
 } from 'vue'

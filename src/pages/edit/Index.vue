@@ -15,7 +15,6 @@ import {
   getCurrentInstance,
   onUnmounted,
   ref,
-  defineProps,
   toRaw
 } from 'vue'
 import { useStore } from 'vuex'

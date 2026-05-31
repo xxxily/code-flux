@@ -28,12 +28,10 @@
 
 <script setup>
 import {
-  defineProps,
   onBeforeUnmount,
   watch,
   inject,
   getCurrentInstance,
-  defineEmits,
   computed,
   ref
 } from 'vue'

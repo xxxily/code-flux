@@ -474,7 +474,7 @@ const { showRunLoading, runTip } = useRunStatus({ proxy })
           padding-left: 20px;
           position: relative;
 
-          /deep/ .expandBtn {
+          :deep(.expandBtn) {
             position: absolute;
             left: 0;
             cursor: pointer;
@@ -486,33 +486,33 @@ const { showRunLoading, runTip } = useRunStatus({ proxy })
               transform: rotateZ(0deg);
             }
           }
-          /deep/ .wrap {
+          :deep(.wrap) {
             overflow: hidden;
           }
-          /deep/ .object,
-          /deep/ .array {
+          :deep(.object),
+          :deep(.array) {
             margin-left: 20px;
           }
-          /deep/ .bracket {
+          :deep(.bracket) {
             color: #999999;
           }
-          /deep/ .key {
+          :deep(.key) {
             color: #e06c75;
           }
-          /deep/ .colon {
+          :deep(.colon) {
             color: #999999;
             margin: 0 5px;
           }
-          /deep/ .string,
-          /deep/ .symbol {
+          :deep(.string),
+          :deep(.symbol) {
             color: #98c379;
           }
-          /deep/ .number {
+          :deep(.number) {
             color: #d19a66;
           }
-          /deep/ .boolean,
-          /deep/ .null,
-          /deep/ .undefined {
+          :deep(.boolean),
+          :deep(.null),
+          :deep(.undefined) {
             color: #56b6c2;
           }
         }
