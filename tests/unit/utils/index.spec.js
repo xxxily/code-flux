@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { parseHtmlContent, assembleHtml, type, generateUUID } from '@/utils/index';
+import {
+  parseHtmlContent,
+  assembleHtml,
+  type,
+  generateUUID,
+  splitHumpStr,
+  utoa,
+  atou,
+  isMobileDevice,
+  getDeviceConfig
+} from '@/utils/index';
 
 describe('parseHtmlContent', () => {
   it('应该正确解析完整的 HTML 结构', () => {
@@ -164,5 +174,138 @@ describe('generateUUID', () => {
     // UUID 格式: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     expect(uuidRegex.test(uuid)).toBe(true);
+  });
+});
+
+describe('splitHumpStr', () => {
+  it('应该正确分割驼峰字符串', () => {
+    expect(splitHumpStr('helloWorld')).toBe('hello World');
+    expect(splitHumpStr('myVariableName')).toBe('my Variable Name');
+  });
+
+  it('应该使用自定义分隔符', () => {
+    expect(splitHumpStr('helloWorld', '-')).toBe('hello-World');
+    expect(splitHumpStr('myVariableName', '_')).toBe('my_Variable_Name');
+  });
+
+  it('应该处理已经有空格的字符串', () => {
+    expect(splitHumpStr('hello World')).toBe('hello  World');
+  });
+
+  it('应该处理空字符串', () => {
+    expect(splitHumpStr('')).toBe('');
+  });
+
+  it('应该处理没有大写字母的字符串', () => {
+    expect(splitHumpStr('hello')).toBe('hello');
+  });
+
+  it('应该处理连续大写字母', () => {
+    expect(splitHumpStr('HTMLParser')).toBe('H T M L Parser');
+  });
+});
+
+describe('utoa', () => {
+  it('应该正确编码字符串', () => {
+    const result = utoa('hello');
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
+  });
+
+  it('应该编码中文字符', () => {
+    const result = utoa('你好世界');
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
+  });
+
+  it('应该处理空字符串', () => {
+    const result = utoa('');
+    expect(result).toBeDefined();
+  });
+
+  it('应该处理特殊字符', () => {
+    const result = utoa('!@#$%^&*()');
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('string');
+  });
+});
+
+describe('atou', () => {
+  it('应该正确解码字符串', () => {
+    const encoded = utoa('hello');
+    const decoded = atou(encoded);
+    expect(decoded).toBe('hello');
+  });
+
+  it('应该解码中文字符', () => {
+    const encoded = utoa('你好世界');
+    const decoded = atou(encoded);
+    expect(decoded).toBe('你好世界');
+  });
+
+  it('应该处理空字符串', () => {
+    const encoded = utoa('');
+    const decoded = atou(encoded);
+    expect(decoded).toBe('');
+  });
+
+  it('应该处理特殊字符', () => {
+    const original = '!@#$%^&*()';
+    const encoded = utoa(original);
+    const decoded = atou(encoded);
+    expect(decoded).toBe(original);
+  });
+
+  it('编码和解码应该是可逆的', () => {
+    const testStrings = [
+      'hello world',
+      '你好世界',
+      '123456',
+      'Test@#$%',
+      'Mixed中英文123'
+    ];
+
+    testStrings.forEach(str => {
+      const encoded = utoa(str);
+      const decoded = atou(encoded);
+      expect(decoded).toBe(str);
+    });
+  });
+});
+
+describe('isMobileDevice', () => {
+  it('应该返回布尔值', () => {
+    const result = isMobileDevice();
+    expect(typeof result).toBe('boolean');
+  });
+
+  it('应该在桌面环境返回 false', () => {
+    // 在测试环境中，userAgent 通常是桌面浏览器
+    const result = isMobileDevice();
+    expect(result).toBe(false);
+  });
+});
+
+describe('getDeviceConfig', () => {
+  it('应该返回设备配置对象', () => {
+    const config = getDeviceConfig();
+    expect(config).toBeDefined();
+    expect(typeof config).toBe('object');
+  });
+
+  it('应该包含必要的配置属性', () => {
+    const config = getDeviceConfig();
+    expect(config).toHaveProperty('fontSize');
+    expect(config).toHaveProperty('lineNumbers');
+    expect(config).toHaveProperty('minimap');
+    expect(config).toHaveProperty('padding');
+  });
+
+  it('配置值应该是正确的类型', () => {
+    const config = getDeviceConfig();
+    expect(typeof config.fontSize).toBe('number');
+    expect(typeof config.lineNumbers).toBe('boolean');
+    expect(typeof config.minimap).toBe('boolean');
+    expect(typeof config.padding).toBe('number');
   });
 });
