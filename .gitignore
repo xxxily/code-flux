@@ -12,5 +12,7 @@ less.js-master
 
 # Test reports
 test-report.json
+test-results/
+playwright-report/
 coverage/
 .nyc_output/

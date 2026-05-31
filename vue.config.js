@@ -7,7 +7,14 @@ module.exports = {
     outputDir: './docs/',
     lintOnSave: false,
     productionSourceMap: false,
-    transpileDependencies: [/monaco-editor-textmate/],
+    transpileDependencies: [
+        /monaco-editor-textmate/,
+        /element-plus/,
+        /@element-plus/,
+        /@ctrl\/tinycolor/,
+        /@octokit/,
+        /vue-router/
+    ],
     configureWebpack: {
         resolve: {
             alias: {

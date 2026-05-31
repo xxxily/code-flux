@@ -1,4 +1,4 @@
-FROM node:18-alpine as build-stage
+FROM node:lts-alpine as build-stage
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm install
+RUN npm ci
 
 # 复制项目文件
 COPY . .
