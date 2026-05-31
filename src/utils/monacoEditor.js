@@ -2,6 +2,11 @@ import { Registry } from 'monaco-textmate'
 import { base } from '@/config'
 import { wireTmGrammars } from 'monaco-editor-textmate'
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
+import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
+import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
+import TsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import { loadWASM } from 'onigasm'
 import {
   monacoEditorInnerLanguages,
@@ -17,21 +22,21 @@ export const initMonacoEditor = async () => {
   await loadWASM(`${base}onigasm/onigasm.wasm`)
   // 配置编辑器运行环境
   window.MonacoEnvironment = {
-    getWorkerUrl: function(moduleId, label) {
+    getWorker: function(moduleId, label) {
       hasGetWorkUrl = true
       if (label === 'json') {
-        return base + 'monaco/json.worker.bundle.js'
+        return new JsonWorker()
       }
       if (label === 'css' || label === 'scss' || label === 'less') {
-        return base + 'monaco/css.worker.bundle.js'
+        return new CssWorker()
       }
       if (label === 'html' || label === 'handlebars' || label === 'razor') {
-        return base + 'monaco/html.worker.bundle.js'
+        return new HtmlWorker()
       }
       if (label === 'typescript' || label === 'javascript') {
-        return base + 'monaco/ts.worker.bundle.js'
+        return new TsWorker()
       }
-      return base + 'monaco/editor.worker.bundle.js'
+      return new EditorWorker()
     }
   }
 }

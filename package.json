@@ -27,11 +27,10 @@
     "frontend"
   ],
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
+    "serve": "vite --host 0.0.0.0 --port 8081",
+    "build": "vite build",
+    "lint": "eslint \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "buildConsole": "babel --config-file ./public/console/babel.config.json ./public/console/index.js --out-file ./public/console/compile.js",
-    "buildMonacoWorker": "node ./scripts/buildMonacoWorker.js",
     "convertTheme": "node ./scripts/convertTheme.js",
     "createThemeList": "node ./scripts/createThemeList.js",
     "buildLiveScript": "node ./scripts/buildLiveScript.js",
@@ -91,28 +90,31 @@
     "@vitejs/plugin-vue": "^6.0.7",
     "@vitest/coverage-v8": "^4.1.7",
     "@vitest/ui": "^4.1.7",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.5.35",
     "@vue/test-utils": "^2.4.10",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
+    "@babel/eslint-parser": "^7.29.7",
+    "eslint": "^8.57.1",
     "eslint-plugin-vue": "^7.0.0",
+    "esbuild": "^0.27.0",
     "fs-extra": "^7.0.1",
     "happy-dom": "^20.9.0",
     "less": "^4.6.4",
-    "less-loader": "^6.2.0",
-    "monaco-editor-webpack-plugin": "^5.0.0",
     "msw": "^2.14.6",
     "prettier": "^1.19.1",
+    "vite": "^8.0.14",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.7",
-    "vscode-theme-to-monaco-theme-node": "^1.0.0",
-    "workbox-webpack-plugin": "^7.4.1"
+    "vscode-theme-to-monaco-theme-node": "^1.0.0"
+  },
+  "overrides": {
+    "brace-expansion@<=1.1.12": "1.1.15",
+    "minimatch@<=3.1.3": "3.1.5",
+    "picomatch@<=2.3.1": "2.3.2"
   },
   "eslintConfig": {
     "root": true,
     "env": {
+      "browser": true,
       "node": true
     },
     "extends": [
@@ -120,7 +122,14 @@
       "eslint:recommended"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "ecmaVersion": 2022,
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false,
+      "sourceType": "module",
+      "babelOptions": {
+        "babelrc": false,
+        "configFile": false
+      }
     },
     "rules": {}
   },

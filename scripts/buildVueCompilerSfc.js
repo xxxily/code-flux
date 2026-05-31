@@ -1,27 +1,26 @@
-// 编译@vue/compiler-sfc为浏览器版本
-// 输出到/public/parses/文件夹下
-const webpack = require('webpack');
-const path = require('path');
+// 编译 @vue/compiler-sfc 为浏览器版本，输出到 /public/parses/vue3.js
+const { build } = require('esbuild')
+const path = require('path')
 
-webpack({
-    entry: './node_modules/@vue/compiler-sfc/dist/compiler-sfc.esm-browser.js',
-    output: {
-        filename: 'vue3.js',
-        path: path.resolve(__dirname, '../public', 'parses'),
-        library: 'Vue3TemplateCompiler',
-        libraryTarget: 'umd'
-    },
-    externals: {
-        fs: 'fs'
-    }
-}, (err, stats) => {
-    if (err || stats.hasErrors()) {
-        console.log(err)
-        console.log(stats.toString({
-            chunks: false,
-            colors: true
-        }));
-    } else {
-        console.log('完成')
-    }
+build({
+  entryPoints: [
+    path.resolve(__dirname, '../node_modules/@vue/compiler-sfc/dist/compiler-sfc.esm-browser.js')
+  ],
+  outfile: path.resolve(__dirname, '../public/parses/vue3.js'),
+  bundle: true,
+  footer: {
+    js: 'globalThis.Vue3TemplateCompiler = Vue3TemplateCompiler;'
+  },
+  format: 'iife',
+  globalName: 'Vue3TemplateCompiler',
+  minify: true,
+  platform: 'browser',
+  external: ['fs']
 })
+  .then(() => {
+    console.log('完成')
+  })
+  .catch(error => {
+    console.error(error)
+    process.exit(1)
+  })

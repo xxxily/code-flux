@@ -40,7 +40,7 @@ import { assembleHtml, compile, compileVue } from '@/utils'
 import { base } from '@/config'
 import { defaultImportMapStr } from '@/config/constants'
 
-const dev = process.env.NODE_ENV !== 'production'
+const dev = import.meta.env.DEV
 
 // props
 const props = defineProps({

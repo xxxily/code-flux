@@ -129,7 +129,7 @@ const js = async (preprocessor, code, importMap) => {
         _code = window.CoffeeScript.compile(code)
         return transformJsImport(_code, importMap)
       case 'livescript': {
-        const liveScript = window.require('livescript')
+        const liveScript = window.LiveScript || window.require('livescript')
         _code = liveScript.compile(code)
         return {
           useImport: false,

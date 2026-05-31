@@ -1,4 +1,14 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="./favicon.png" rel="shortcut icon"><title>CodeFlux - AI生成式前端代码预览/微调辅助工具，前端代码在线运行/发布平台，codepen、jsbin、jsfiddle等的开源替代方案</title><style>/* 页面加载动画样式 */
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="./favicon.png" rel="shortcut icon">
+  <title>CodeFlux - AI生成式前端代码预览/微调辅助工具，前端代码在线运行/发布平台，codepen、jsbin、jsfiddle等的开源替代方案</title>
+  <style>
+    /* 页面加载动画样式 */
     #app-loading {
       position: fixed;
       top: 0;
@@ -160,7 +170,69 @@
     .code-line:nth-child(3).animate-line { animation-delay: 0.6s; }
     .code-line:nth-child(4).animate-line { animation-delay: 0.8s; }
     .code-line:nth-child(5).animate-line { animation-delay: 1.0s; }
-    .code-line:nth-child(6).animate-line { animation-delay: 1.2s; }</style><link href="js/chunk-0b65ffb6.3aa5f83f.js" rel="prefetch"><link href="js/chunk-2d0b2762.5030985e.js" rel="prefetch"><link href="js/chunk-2d0bb267.ca59b870.js" rel="prefetch"><link href="js/chunk-2d0bff92.ac763d79.js" rel="prefetch"><link href="js/chunk-2d20ff23.5874d416.js" rel="prefetch"><link href="js/chunk-2d21b84a.236988cd.js" rel="prefetch"><link href="js/chunk-2d21f327.5aeb4b52.js" rel="prefetch"><link href="js/chunk-2d22502a.5c435060.js" rel="prefetch"><link href="js/chunk-2d22ca58.a89e30a1.js" rel="prefetch"><link href="js/chunk-30597b4a.42d79e26.js" rel="prefetch"><link href="js/chunk-7532b3ea.446096d0.js" rel="prefetch"><link href="css/app.5ffd3cf7.css" rel="preload" as="style"><link href="css/chunk-vendors.aafd0e96.css" rel="preload" as="style"><link href="js/app.76d66690.js" rel="preload" as="script"><link href="js/chunk-vendors.33b8f2f2.js" rel="preload" as="script"><link href="css/chunk-vendors.aafd0e96.css" rel="stylesheet"><link href="css/app.5ffd3cf7.css" rel="stylesheet"></head><body><div id="app-loading"><div class="simple-loading" id="simple-loading"></div><div class="simple-text" id="simple-text">加载中...</div><div class="code-editor-loading" id="code-editor-loading"><div class="editor-header"><div class="editor-dot dot-red"></div><div class="editor-dot dot-yellow"></div><div class="editor-dot dot-green"></div></div><div class="editor-code"><div class="code-line"><span class="line-number">1</span> <span><span class="keyword">import</span> { <span class="variable">createApp</span> } <span class="keyword">from</span> <span class="string">'vue'</span></span></div><div class="code-line"><span class="line-number">2</span> <span><span class="keyword">import</span> <span class="variable">App</span> <span class="keyword">from</span> <span class="string">'./App.vue'</span></span></div><div class="code-line"><span class="line-number">3</span> <span><span class="keyword">const</span> <span class="variable">app</span> = <span class="function">createApp</span>(App)</span></div><div class="code-line"><span class="line-number">4</span> <span><span class="variable">app</span>.<span class="function">mount</span>(<span class="string">'#app'</span>)</span></div><div class="code-line"><span class="line-number">5</span> <span><span class="comment">// 正在加载 CodeFlux...</span></span></div><div class="code-line"><span class="line-number">6</span> <span><span class="function">console</span>.<span class="function">log</span>(<span class="string">'初始化中'</span>)<span class="cursor"></span></span></div></div></div><div class="loading-text" id="loading-text">加载中... <span class="loading-percentage" id="loading-percentage">0%</span></div><div class="loading-tips" id="loading-tips">CodeFlux 完全开源，欢迎贡献代码</div></div><div id="app"></div><script defer src="./prettier/standalone.js"></script><script defer src="./prettier/parser-html.js"></script><script defer src="./prettier/parser-postcss.js"></script><script defer src="./prettier/parser-babel.js"></script><script defer src="./prettier/parser-typescript.js"></script><script>// 加载进度模拟
+    .code-line:nth-child(6).animate-line { animation-delay: 1.2s; }
+  </style>
+  <script type="module" crossorigin src="./assets/index-Bc2fXwLb.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CsHFPh7r.css">
+<link rel="manifest" href="./manifest.webmanifest"></head>
+
+<body>
+  <!-- 添加有趣的页面加载动画 -->
+  <div id="app-loading">
+    <!-- 简单的初始loading效果 -->
+    <div class="simple-loading" id="simple-loading"></div>
+    <div class="simple-text" id="simple-text">加载中...</div>
+    
+    <!-- 复杂的代码编辑器loading效果 (初始隐藏) -->
+    <div class="code-editor-loading" id="code-editor-loading">
+      <div class="editor-header">
+        <div class="editor-dot dot-red"></div>
+        <div class="editor-dot dot-yellow"></div>
+        <div class="editor-dot dot-green"></div>
+      </div>
+      <div class="editor-code">
+        <div class="code-line">
+          <span class="line-number">1</span>
+          <span><span class="keyword">import</span> { <span class="variable">createApp</span> } <span class="keyword">from</span> <span class="string">'vue'</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-number">2</span>
+          <span><span class="keyword">import</span> <span class="variable">App</span> <span class="keyword">from</span> <span class="string">'./App.vue'</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-number">3</span>
+          <span><span class="keyword">const</span> <span class="variable">app</span> = <span class="function">createApp</span>(App)</span>
+        </div>
+        <div class="code-line">
+          <span class="line-number">4</span>
+          <span><span class="variable">app</span>.<span class="function">mount</span>(<span class="string">'#app'</span>)</span>
+        </div>
+        <div class="code-line">
+          <span class="line-number">5</span>
+          <span><span class="comment">// 正在加载 CodeFlux...</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-number">6</span>
+          <span><span class="function">console</span>.<span class="function">log</span>(<span class="string">'初始化中'</span>)<span class="cursor"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="loading-text" id="loading-text">
+      加载中... <span class="loading-percentage" id="loading-percentage">0%</span>
+    </div>
+    <div class="loading-tips" id="loading-tips">
+      CodeFlux 完全开源，欢迎贡献代码
+    </div>
+  </div>
+  
+  <div id="app"></div>
+  <script defer src="./prettier/standalone.js"></script>
+  <script defer src="./prettier/parser-html.js"></script>
+  <script defer src="./prettier/parser-postcss.js"></script>
+  <script defer src="./prettier/parser-babel.js"></script>
+  <script defer src="./prettier/parser-typescript.js"></script>
+  <script>
+    // 加载进度模拟
     (function() {
       const tips = [
         "CodeFlux 完全开源，欢迎贡献代码",
@@ -267,14 +339,7 @@
       };
     })();
     
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('SW registered:', registration);
-          })
-          .catch(error => {
-            console.log('SW registration failed:', error);
-          });
-      });
-    }</script><script src="js/chunk-vendors.33b8f2f2.js"></script><script src="js/app.76d66690.js"></script></body></html>
+  </script>
+</body>
+
+</html>

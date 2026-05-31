@@ -189,7 +189,7 @@ npm run serve
 
 请先确认打包后应用的基路径，项目默认的基路径为`./`，如果你想换一个，可以按如下步骤修改：
 
-1.修改`vue.config.js`文件里的`publicPath`字段。
+1.修改`vite.config.js`文件里的`base`字段。
 
 2.修改`src/config/index.js`文件的`base`字段。
 
@@ -199,7 +199,7 @@ npm run serve
 
 另外history模式下如果存在多级路径，可能需要修改以下文件：
 
-1.修改`/public/index.html`文件的`prettier`相关`js`资源的路径；
+1.修改`/index.html`文件的`prettier`相关`js`资源的路径；
 
 ## 打包命令
 
@@ -209,7 +209,7 @@ npm run build
 
 # 项目主要技术
 
-脚手架： `Vue CLI`
+构建工具： `Vite`
 
 框架：`Vue 3.X`全家桶，通过`script setup`使用`组合式API`
 
@@ -245,13 +245,13 @@ import moment from 'https://unpkg.com/moment?module'
 
 - `npm run buildConsole`：编译项目的`/public/console/index.js`文件为`ES5`语法，输出到同目录下的`compile.js`，该文件会在页面预览的`iframe`里进行加载，请勿直接修改`compile.js`文件。
 
-- `npm run buildMonacoWorker`：打包`Monaco Editor`编辑器的`worker`文件，如果使用的`Monaco Editor`编辑器版本变化了需要重新打包。
-
 - `npm run convertTheme`：将`VSCode`主题文件转换成`Monaco Editor`主题文件。
 
 - `npm run createThemeList`：根据主题文件列表自动生成配置文件。
 
 - `npm run buildVueSFCCompiler`：打包`@vue/compiler-sfc`文件，针对`Vue3`。
+
+`Monaco Editor` 的 worker 由 Vite 通过 `src/utils/monacoEditor.js` 打包。
 
 # 编译器更新指南
 

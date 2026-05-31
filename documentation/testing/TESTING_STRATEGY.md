@@ -24,7 +24,7 @@
 
 ### 项目特点
 - **前端框架**: Vue 3 + Composition API
-- **构建工具**: Vue CLI + Webpack
+- **构建工具**: Vite
 - **代码编辑器**: Monaco Editor
 - **核心功能**: 
   - 代码编辑

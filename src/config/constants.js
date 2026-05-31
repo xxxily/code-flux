@@ -79,7 +79,7 @@ export const supportESModuleMap = {
   vue3: true
 }
 
-// monaco editor包含的语言，可通过vue.config.js的MonacoWebpackPlugin插件进行配置
+// Monaco Editor 内置语言，对应 worker 由 Vite 在 src/utils/monacoEditor.js 中打包
 export const monacoEditorInnerLanguages = [
   'css',
   'html',

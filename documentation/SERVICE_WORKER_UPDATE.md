@@ -78,12 +78,13 @@ updated (registration) {
 }
 ```
 
-#### 3. 构建配置 (vue.config.js)
+#### 3. 构建配置 (vite.config.js)
 
 ```javascript
-new InjectManifest({
-  swSrc: './src/service-worker.js',
-  swDest: 'service-worker.js'
+VitePWA({
+  strategies: 'injectManifest',
+  srcDir: 'src',
+  filename: 'service-worker.js'
 })
 ```
 

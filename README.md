@@ -192,7 +192,7 @@ npm run serve
 
 First, confirm the base path for your application after building. The project's default base path is `./`. If you want to change it, follow these steps:
 
-1. Modify the `publicPath` field in the `vue.config.js` file.
+1. Modify the `base` field in the `vite.config.js` file.
 
 2. Modify the `base` field in the `src/config/index.js` file.
 
@@ -202,7 +202,7 @@ The default router mode is `hash mode`. If you need to use `history` mode, modif
 
 Additionally, in history mode with multi-level paths, you may need to modify the following file:
 
-1. Update the paths of `prettier`-related `js` resources in the `/public/index.html` file.
+1. Update the paths of `prettier`-related `js` resources in the `/index.html` file.
 
 ## Build Command
 
@@ -212,7 +212,7 @@ npm run build
 
 # Project Technology Stack
 
-Scaffolding: `Vue CLI`
+Build Tool: `Vite`
 
 Framework: `Vue 3.X` ecosystem, using Composition API via `script setup`
 
@@ -248,13 +248,13 @@ This tutorial is for migrating VSCode themes.
 
 - `npm run buildConsole`: Compiles the project's `/public/console/index.js` file to ES5 syntax, outputting to `compile.js` in the same directory. This file is loaded in the preview iframe; do not modify `compile.js` directly.
 
-- `npm run buildMonacoWorker`: Packages the Monaco Editor's worker files. If the Monaco Editor version changes, you'll need to repackage these.
-
 - `npm run convertTheme`: Converts VSCode theme files to Monaco Editor theme files.
 
 - `npm run createThemeList`: Automatically generates a configuration file based on the theme file list.
 
 - `npm run buildVueSFCCompiler`: Packages the `@vue/compiler-sfc` file for Vue3.
+
+Monaco Editor workers are bundled by Vite through `src/utils/monacoEditor.js`.
 
 # Compiler Update Guide
 

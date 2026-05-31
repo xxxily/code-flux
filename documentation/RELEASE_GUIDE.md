@@ -118,11 +118,11 @@ ls -la docs/
 
 # 检查构建产物是否正常
 # - docs/index.html 应该存在
-# - docs/js/ 和 docs/css/ 目录应该包含打包后的文件
+# - docs/assets/ 目录应该包含打包后的文件
 ```
 
 **重要**：
-- 构建输出目录为 `./docs/`（配置在 `vue.config.js` 中）
+- 构建输出目录为 `./docs/`（配置在 `vite.config.js` 中）
 - GitHub Pages 会自动从 `docs` 目录部署网站
 - 必须将 `docs` 目录的变更一起提交
 
