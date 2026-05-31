@@ -4,8 +4,7 @@ import {
   monacoEditorInnerLanguages,
   scopeNameMap,
   tmGrammarJsonMap,
-  defaultViewThemeConfig,
-  defaultCodeThemeConfig
+  defaultViewThemeConfig
 } from '@/config/constants';
 
 describe('constants.js 配置测试', () => {

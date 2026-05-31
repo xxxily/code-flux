@@ -134,14 +134,15 @@ const js = (preprocessor, code, importMap) => {
           _code = window.CoffeeScript.compile(code)
           resolve(transformJsImport(_code, importMap))
           break
-        case 'livescript':
-          let liveScript = window.require('livescript')
+        case 'livescript': {
+          const liveScript = window.require('livescript')
           _code = liveScript.compile(code)
           resolve({
             useImport: false,
             js: _code
           })
           break
+        }
         default:
           resolve({
             useImport: false,
@@ -199,7 +200,7 @@ const css = (preprocessor, code) => {
           )
           break
         case 'sass':
-        case 'scss':
+        case 'scss': {
           // 每次创建新实例，避免状态混乱
           const sassInstance = new window.Sass()
           sassInstance.compile(
@@ -217,6 +218,7 @@ const css = (preprocessor, code) => {
             }
           )
           break
+        }
         case 'stylus':
           window.stylus.render(code, (err, css) => {
             clearTimeout(timeout)

@@ -99,7 +99,7 @@ describe('Preview 组件', () => {
 
     // 触发 run 方法会设置加载状态
     // 由于 run 是异步的，我们需要等待
-    const runPromise = wrapper.vm.run();
+    void wrapper.vm.run();
     await wrapper.vm.$nextTick();
 
     // 应该显示加载遮罩（在编译过程中）
@@ -114,7 +114,7 @@ describe('Preview 组件', () => {
 
   it('应该有取消按钮', async () => {
     // 触发运行以显示加载状态
-    const runPromise = wrapper.vm.run();
+    void wrapper.vm.run();
     await wrapper.vm.$nextTick();
 
     // 由于 mock 的 compile 立即返回，加载状态可能很快消失
@@ -123,7 +123,7 @@ describe('Preview 组件', () => {
 
   it('应该能够取消运行', async () => {
     // 触发运行
-    const runPromise = wrapper.vm.run();
+    void wrapper.vm.run();
     await wrapper.vm.$nextTick();
 
     // 查找取消按钮（如果存在）
